@@ -10,6 +10,10 @@ function watchErrors(page: Page): string[] {
 }
 
 test.describe("[s11] 私人上下文 · 来源与推测", () => {
+  test.beforeEach(() => {
+    test.skip(test.info().project.name === "mobile", "desktop-shell design surface");
+  });
+
   test("renders intent, inference, and sources with honest boundaries", async ({
     page,
   }) => {
@@ -112,6 +116,10 @@ test.describe("[s11] 私人上下文 · 来源与推测", () => {
 });
 
 test.describe("[s12] 时间回顾 · 收益不做假账", () => {
+  test.beforeEach(() => {
+    test.skip(test.info().project.name === "mobile", "desktop-shell design surface");
+  });
+
   test("renders separated ledgers and no fabricated savings", async ({
     page,
   }) => {
@@ -187,6 +195,10 @@ test.describe("[s12] 时间回顾 · 收益不做假账", () => {
 });
 
 test.describe("[s13] 同步异常 · 未知与接管", () => {
+  test.beforeEach(() => {
+    test.skip(test.info().project.name === "mobile", "desktop-shell design surface");
+  });
+
   test("keeps unknowns explicit instead of claiming full protection", async ({
     page,
   }) => {
@@ -268,6 +280,10 @@ test.describe("[s13] 同步异常 · 未知与接管", () => {
 });
 
 test.describe("[s14] 快捷输入 · 意图与约束", () => {
+  test.beforeEach(() => {
+    test.skip(test.info().project.name === "mobile", "desktop-shell design surface");
+  });
+
   test("parses one sentence into intent plus constraint, no hidden grants", async ({
     page,
   }) => {
