@@ -40,9 +40,7 @@ test.describe("[s01] 此刻 · 时间主权", () => {
         "覆盖范围：工作日历、任务清单、指定文件。其他生活安排仍需你确认。",
       ),
     ).toBeVisible();
-    await expect(
-      root.getByText(/倒计时|连续打卡|完成/),
-    ).toHaveCount(0);
+    await expect(root.getByText(/倒计时|连续打卡|已完成/)).toHaveCount(0);
     await root.getByRole("button", { name: /看看可行的做法/ }).click();
     await expect(page).toHaveURL(/\/plan$/);
     await expect(page.locator('[data-page="s04"]')).toBeVisible();

@@ -1,0 +1,6 @@
+
+Running 1 test using 1 worker
+
+  ✓  1 [desktop] › tests/groupA.spec.ts:13:3 › [s01] 此刻 · 时间主权 › shows protected time, capacity gap, and navigates to plan (544ms)
+
+  1 passed (2.2s)
