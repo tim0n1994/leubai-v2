@@ -1,0 +1,24 @@
+/* 留白 V2 — design tokens (source: design/UIUX_交互规范.md §02) */
+:root {
+  --bg: #F3F5F6;
+  --text: #232C32;
+  --text-2: #65727B;
+  --divider: #DDE4E7;
+  --info: #426D92;
+  --ok: #4D7771;
+  --warm: #956C43;
+  --surface: #FFFFFF;
+  --surface-2: #FAFCFC;
+  --graphite: #2F3B42;
+  --focus: #7A9FBA;
+  --radius-sm: 24px;
+  --radius-md: 28px;
+  --radius-lg: 34px;
+  --btn-h: 54px;
+  --btn-h-m: 50px;
+  --font-serif: "Noto Serif CJK SC", "Songti SC", "STSong", "SimSun", serif;
+  --font-sans: "Noto Sans CJK SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --font-latin: Inter, "Helvetica Neue", Arial, sans-serif;
+  --shadow-panel: 0 18px 50px rgba(35, 44, 50, 0.06);
+  --shadow-btn: 0 10px 24px rgba(35, 44, 50, 0.16);
+}
