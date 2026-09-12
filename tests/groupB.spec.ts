@@ -1,5 +1,9 @@
 import { test, expect } from "@playwright/test";
 
+test.beforeEach(() => {
+  test.skip(test.info().project.name === "mobile", "desktop-shell design surface");
+});
+
 function watchErrors(page: import("@playwright/test").Page): string[] {
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(String(e)));
