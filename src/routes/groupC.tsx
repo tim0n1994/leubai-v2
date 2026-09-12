@@ -1,34 +1,53 @@
+import { S11Context } from "../screens/s11-context/S11Context";
+import { S12Review } from "../screens/s12-review/S12Review";
+import { S13Sync } from "../screens/s13-sync/S13Sync";
+import { S14Capture } from "../screens/s14-capture/S14Capture";
+import { S15MNow } from "../screens/s15-m-now/S15MNow";
+import { S16MPlan } from "../screens/s16-m-plan/S16MPlan";
+import { S17MAuth } from "../screens/s17-m-auth/S17MAuth";
+import { S18MBlank } from "../screens/s18-m-blank/S18MBlank";
+import { MobileStage } from "../shell/Shell";
 import type { RouteGroup } from "./types";
-
-function ScreenStub({ id, title }: { id: string; title: string }) {
-  return (
-    <section className="stub" data-page={id}>
-      <h1 className="stub-title">{title}</h1>
-      <p className="stub-note">该屏幕按设计稿实现中。</p>
-    </section>
-  );
-}
-
-function MobileStub({ id, title }: { id: string; title: string }) {
-  return (
-    <section className="stub" data-page={id}>
-      <h1 className="stub-title">{title}</h1>
-      <p className="stub-note">该屏幕按设计稿实现中。</p>
-    </section>
-  );
-}
 
 export const groupC: RouteGroup = {
   shell: [
-    { path: "/context", element: <ScreenStub id="s11" title="私人上下文 · 来源与推测" /> },
-    { path: "/review", element: <ScreenStub id="s12" title="时间回顾 · 收益不做假账" /> },
-    { path: "/sync", element: <ScreenStub id="s13" title="同步异常 · 未知与接管" /> },
-    { path: "/capture", element: <ScreenStub id="s14" title="快捷输入 · 意图与约束" /> },
+    { path: "/context", element: <S11Context /> },
+    { path: "/review", element: <S12Review /> },
+    { path: "/sync", element: <S13Sync /> },
+    { path: "/capture", element: <S14Capture /> },
   ],
   bare: [
-    { path: "/m/now", element: <MobileStub id="s15" title="移动端 · 此刻" /> },
-    { path: "/m/plan", element: <MobileStub id="s16" title="移动端 · 自适应方案" /> },
-    { path: "/m/auth", element: <MobileStub id="s17" title="移动端 · 一次性授权" /> },
-    { path: "/m/blank", element: <MobileStub id="s18" title="移动端 · 留白时刻" /> },
+    {
+      path: "/m/now",
+      element: (
+        <MobileStage>
+          <S15MNow />
+        </MobileStage>
+      ),
+    },
+    {
+      path: "/m/plan",
+      element: (
+        <MobileStage>
+          <S16MPlan />
+        </MobileStage>
+      ),
+    },
+    {
+      path: "/m/auth",
+      element: (
+        <MobileStage>
+          <S17MAuth />
+        </MobileStage>
+      ),
+    },
+    {
+      path: "/m/blank",
+      element: (
+        <MobileStage>
+          <S18MBlank />
+        </MobileStage>
+      ),
+    },
   ],
 };
