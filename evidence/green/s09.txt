@@ -1,0 +1,9 @@
+
+Running 2 tests using 1 worker
+
+(node:23505) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [desktop] › tests/groupB.spec.ts:186:3 › s09 attention › s09 renders shared attention budget (323ms)
+  ✓  2 [desktop] › tests/groupB.spec.ts:227:3 › s09 attention › s09 budget arithmetic stays consistent (395ms)
+
+  2 passed (1.3s)
