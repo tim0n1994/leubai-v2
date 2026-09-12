@@ -3,15 +3,7 @@ import { WorkspaceScreen } from "../screens/s06-workspace/WorkspaceScreen";
 import { SessionScreen } from "../screens/s07-session/SessionScreen";
 import { BlankScreen } from "../screens/s08-blank/BlankScreen";
 import { AttentionScreen } from "../screens/s09-attention/AttentionScreen";
-
-function ScreenStub({ id, title }: { id: string; title: string }) {
-  return (
-    <section className="stub" data-page={id}>
-      <h1 className="stub-title">{title}</h1>
-      <p className="stub-note">该屏幕按设计稿实现中。</p>
-    </section>
-  );
-}
+import { BoundariesScreen } from "../screens/s10-boundaries/BoundariesScreen";
 
 export const groupB: RouteGroup = {
   shell: [
@@ -19,7 +11,7 @@ export const groupB: RouteGroup = {
     { path: "/session", element: <SessionScreen /> },
     { path: "/blank", element: <BlankScreen /> },
     { path: "/attention", element: <AttentionScreen /> },
-    { path: "/boundaries", element: <ScreenStub id="s10" title="我的边界 · 权限与暂停" /> },
+    { path: "/boundaries", element: <BoundariesScreen /> },
   ],
   bare: [],
 };
