@@ -221,7 +221,7 @@ test.describe("[s13] 同步异常 · 未知与接管", () => {
     await expect(root.getByText("17:02 已同步")).toBeVisible();
     await expect(root.getByText("任务清单")).toBeVisible();
     await expect(root.getByText("17:00 已同步")).toBeVisible();
-    await expect(root.getByText("个人日历")).toBeVisible();
+    await expect(root.getByText("个人日历", { exact: true })).toBeVisible();
     await expect(root.getByText("16:41 后未同步")).toBeVisible();
     await expect(root.getByText("家庭日历")).toBeVisible();
     await expect(root.getByText("尚未连接")).toBeVisible();
