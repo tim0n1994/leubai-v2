@@ -1,0 +1,8 @@
+    Error: expect(locator).toBeVisible() failed
+    Locator: locator('[data-shell]')
+    Expected: visible
+    Error: element(s) not found
+      - Expect "toBeVisible" locator('[data-shell]') with timeout 5000ms
+      - waiting for locator('[data-shell]')
+    > 36 |   await expect(page.locator("[data-shell]")).toBeVisible();
+  1 failed

@@ -1,0 +1,128 @@
+.shell {
+  display: grid;
+  grid-template-columns: 232px 1fr;
+  min-height: 100vh;
+}
+
+.shell-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 32px 20px;
+  border-right: 1px solid var(--divider);
+  background: var(--surface);
+}
+
+.shell-brand-zh {
+  display: block;
+  font-family: var(--font-serif);
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: 6px;
+}
+
+.shell-brand-en {
+  display: block;
+  margin-top: 6px;
+  font-family: var(--font-latin);
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--text-2);
+}
+
+.shell-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.shell-nav-item {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 14px;
+  font-size: 15px;
+  color: var(--text-2);
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.shell-nav-item:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.shell-nav-item.is-active {
+  background: var(--graphite);
+  color: #fff;
+}
+
+.shell-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.shell-topbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 72px;
+  padding: 0 40px;
+  border-bottom: 1px solid var(--divider);
+  background: var(--surface);
+}
+
+.shell-topbar-title {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.shell-badge {
+  padding: 4px 12px;
+  border: 1px solid var(--divider);
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+.shell-date {
+  margin-left: auto;
+  font-family: var(--font-latin);
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.shell-content {
+  flex: 1;
+  padding: 40px;
+}
+
+.shell-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 16px 40px;
+  border-top: 1px solid var(--divider);
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+.mobile-stage {
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 40px 16px;
+}
+
+.mobile-frame {
+  width: 480px;
+  max-width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-panel);
+  overflow: hidden;
+}
