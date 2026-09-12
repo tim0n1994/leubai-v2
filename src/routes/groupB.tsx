@@ -1,4 +1,5 @@
 import type { RouteGroup } from "./types";
+import { WorkspaceScreen } from "../screens/s06-workspace/WorkspaceScreen";
 
 function ScreenStub({ id, title }: { id: string; title: string }) {
   return (
@@ -11,7 +12,7 @@ function ScreenStub({ id, title }: { id: string; title: string }) {
 
 export const groupB: RouteGroup = {
   shell: [
-    { path: "/workspace", element: <ScreenStub id="s06" title="协同工作台 · 有来源的草稿" /> },
+    { path: "/workspace", element: <WorkspaceScreen /> },
     { path: "/session", element: <ScreenStub id="s07" title="工作现场 · 恢复下一步" /> },
     { path: "/blank", element: <ScreenStub id="s08" title="留白时刻 · 不安排也成立" /> },
     { path: "/attention", element: <ScreenStub id="s09" title="注意力队列 · 同一份预算" /> },

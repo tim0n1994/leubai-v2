@@ -1,0 +1,58 @@
+== RED evidence s07 — npx playwright test tests/groupB.spec.ts --project=desktop — failing for missing content (stub screens) ==
+[4/11] [desktop] › tests/groupB.spec.ts:87:3 › s07 session › s07 renders checkpoint restore copy
+  4) [desktop] › tests/groupB.spec.ts:87:3 › s07 session › s07 renders checkpoint restore copy ─────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('[data-page="s07"]').getByText('从刚才那个判断继续。')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" locator('[data-page="s07"]').getByText('从刚才那个判断继续。') with timeout 5000ms
+      - waiting for locator('[data-page="s07"]').getByText('从刚才那个判断继续。')
+
+
+      112 |     ];
+      113 |     for (const line of copy) {
+    > 114 |       await expect(root.getByText(line)).toBeVisible();
+          |                                          ^
+      115 |     }
+      116 |     await expect(root.getByText("已确认", { exact: true })).toBeVisible();
+      117 |     await expect(root.getByRole("button", { name: "查看规则差异" })).toBeVisible();
+        at /Users/chillbit/Proj/leubai-v2/tests/groupB.spec.ts:114:42
+
+    Error Context: test-results/groupB-s07-session-s07-renders-checkpoint-restore-copy-desktop/error-context.md
+
+
+(node:16562) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[5/11] [desktop] › tests/groupB.spec.ts:122:3 › s07 session › s07 diff, dictation and defer paths work
+  5) [desktop] › tests/groupB.spec.ts:122:3 › s07 session › s07 diff, dictation and defer paths work 
+
+    Test timeout of 15000ms exceeded.
+
+    Error: locator.click: Test timeout of 15000ms exceeded.
+    Call log:
+      - waiting for locator('[data-page="s07"]').getByRole('button', { name: '查看规则差异' })
+
+
+      124 |     await page.goto("/session");
+      125 |     const root = page.locator('[data-page="s07"]');
+    > 126 |     await root.getByRole("button", { name: "查看规则差异" }).click();
+          |                                                        ^
+      127 |     await expect(root.getByText("现在：每次准备前都需要你确认。")).toBeVisible();
+      128 |     await expect(root.getByText("候选：只在已选来源内自动准备，随时可撤回。")).toBeVisible();
+      129 |     await expect(root.getByText("边界不变：仍不允许对外发送。")).toBeVisible();
+        at /Users/chillbit/Proj/leubai-v2/tests/groupB.spec.ts:126:56
+
+    Error Context: test-results/groupB-s07-session-s07-diff-dictation-and-defer-paths-work-desktop/error-context.md
+
+
+(node:16585) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+

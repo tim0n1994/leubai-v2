@@ -1,0 +1,49 @@
+== RED evidence s09 — npx playwright test tests/groupB.spec.ts --project=desktop — failing for missing content (stub screens) ==
+[8/11] [desktop] › tests/groupB.spec.ts:186:3 › s09 attention › s09 renders shared attention budget
+  8) [desktop] › tests/groupB.spec.ts:186:3 › s09 attention › s09 renders shared attention budget ──
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5199/attention
+    Call log:
+      - navigating to "http://127.0.0.1:5199/attention", waiting until "load"
+
+
+      186 |   test("s09 renders shared attention budget", async ({ page }) => {
+      187 |     const errors = watchErrors(page);
+    > 188 |     await page.goto("/attention");
+          |                ^
+      189 |     const root = page.locator('[data-page="s09"]');
+      190 |     await expect(root).toBeVisible();
+      191 |     const copy = [
+        at /Users/chillbit/Proj/leubai-v2/tests/groupB.spec.ts:188:16
+
+    Error Context: test-results/groupB-s09-attention-s09-renders-shared-attention-budget-desktop/error-context.md
+
+
+(node:16614) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[9/11] [desktop] › tests/groupB.spec.ts:227:3 › s09 attention › s09 budget arithmetic stays consistent
+  9) [desktop] › tests/groupB.spec.ts:227:3 › s09 attention › s09 budget arithmetic stays consistent 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5199/attention
+    Call log:
+      - navigating to "http://127.0.0.1:5199/attention", waiting until "load"
+
+
+      227 |   test("s09 budget arithmetic stays consistent", async ({ page }) => {
+      228 |     const errors = watchErrors(page);
+    > 229 |     await page.goto("/attention");
+          |                ^
+      230 |     const root = page.locator('[data-page="s09"]');
+      231 |     await root.getByRole("button", { name: "查看差异" }).click();
+      232 |     await expect(root.getByText("旧：沿用成本说明（未核对）")).toBeVisible();
+        at /Users/chillbit/Proj/leubai-v2/tests/groupB.spec.ts:229:16
+
+    Error Context: test-results/groupB-s09-attention-s09-budget-arithmetic-stays-consistent-desktop/error-context.md
+
+
+(node:16620) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+

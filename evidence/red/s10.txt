@@ -1,0 +1,67 @@
+== RED evidence s10 — npx playwright test tests/groupB.spec.ts --project=desktop — failing for missing content (stub screens) ==
+[10/11] [desktop] › tests/groupB.spec.ts:245:3 › s10 boundaries › s10 renders permission boundary copy
+  10) [desktop] › tests/groupB.spec.ts:245:3 › s10 boundaries › s10 renders permission boundary copy 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5199/boundaries
+    Call log:
+      - navigating to "http://127.0.0.1:5199/boundaries", waiting until "load"
+
+
+      245 |   test("s10 renders permission boundary copy", async ({ page }) => {
+      246 |     const errors = watchErrors(page);
+    > 247 |     await page.goto("/boundaries");
+          |                ^
+      248 |     const root = page.locator('[data-page="s10"]');
+      249 |     await expect(root).toBeVisible();
+      250 |     const copy = [
+        at /Users/chillbit/Proj/leubai-v2/tests/groupB.spec.ts:247:16
+
+    Error Context: test-results/groupB-s10-boundaries-s10-renders-permission-boundary-copy-desktop/error-context.md
+
+
+(node:16626) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[11/11] [desktop] › tests/groupB.spec.ts:286:3 › s10 boundaries › s10 category panels and pause state work
+  11) [desktop] › tests/groupB.spec.ts:286:3 › s10 boundaries › s10 category panels and pause state work 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5199/boundaries
+    Call log:
+      - navigating to "http://127.0.0.1:5199/boundaries", waiting until "load"
+
+
+      286 |   test("s10 category panels and pause state work", async ({ page }) => {
+      287 |     const errors = watchErrors(page);
+    > 288 |     await page.goto("/boundaries");
+          |                ^
+      289 |     const root = page.locator('[data-page="s10"]');
+      290 |     const nav = root.locator("[data-rule-nav]");
+      291 |     await nav.getByRole("button", { name: "时间边界" }).click();
+        at /Users/chillbit/Proj/leubai-v2/tests/groupB.spec.ts:288:16
+
+    Error Context: test-results/groupB-s10-boundaries-s10--7df9b-panels-and-pause-state-work-desktop/error-context.md
+
+
+  11 failed
+    [desktop] › tests/groupB.spec.ts:13:3 › s06 workspace › s06 renders draft workspace copy ───────
+    [desktop] › tests/groupB.spec.ts:53:3 › s06 workspace › s06 confirm flow respects draft state machine 
+    [desktop] › tests/groupB.spec.ts:75:3 › s06 workspace › s06 disagree judgment also unlocks partial confirmation 
+    [desktop] › tests/groupB.spec.ts:87:3 › s07 session › s07 renders checkpoint restore copy ──────
+    [desktop] › tests/groupB.spec.ts:122:3 › s07 session › s07 diff, dictation and defer paths work 
+    [desktop] › tests/groupB.spec.ts:143:3 › s08 blank › s08 renders protected blank time without pressure 
+    [desktop] › tests/groupB.spec.ts:167:3 › s08 blank › s08 choices stay quiet and honest ─────────
+    [desktop] › tests/groupB.spec.ts:186:3 › s09 attention › s09 renders shared attention budget ───
+    [desktop] › tests/groupB.spec.ts:227:3 › s09 attention › s09 budget arithmetic stays consistent 
+    [desktop] › tests/groupB.spec.ts:245:3 › s10 boundaries › s10 renders permission boundary copy ─
+    [desktop] › tests/groupB.spec.ts:286:3 › s10 boundaries › s10 category panels and pause state work 
+ workspace › s06 confirm flow respects draft state machine 
+    [desktop] › tests/groupB.spec.ts:75:3 › s06 workspace › s06 disagree judgment also unlocks partial confirmation 
+    [desktop] › tests/groupB.spec.ts:87:3 › s07 session › s07 renders checkpoint restore copy ──────
+    [desktop] › tests/groupB.spec.ts:122:3 › s07 session › s07 diff, dictation and defer paths work 
+    [desktop] › tests/groupB.spec.ts:143:3 › s08 blank › s08 renders protected blank time without pressure 
+    [desktop] › tests/groupB.spec.ts:167:3 › s08 blank › s08 choices stay quiet and honest ─────────
+    [desktop] › tests/groupB.spec.ts:186:3 › s09 attention › s09 renders shared attention budget ───
+    [desktop] › tests/groupB.spec.ts:227:3 › s09 attention › s09 budget arithmetic stays consistent 
+    [desktop] › tests/groupB.spec.ts:245:3 › s10 boundaries › s10 renders permission boundary copy ─
+    [desktop] › tests/groupB.spec.ts:286:3 › s10 boundaries › s10 category panels and pause state work 

@@ -1,0 +1,89 @@
+== RED evidence s06 — npx playwright test tests/groupB.spec.ts --project=desktop — failing for missing content (stub screens) ==
+[1/11] [desktop] › tests/groupB.spec.ts:13:3 › s06 workspace › s06 renders draft workspace copy
+  1) [desktop] › tests/groupB.spec.ts:13:3 › s06 workspace › s06 renders draft workspace copy ──────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('[data-page="s06"]').getByText('让 AI 准备，让判断回到你。')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" locator('[data-page="s06"]').getByText('让 AI 准备，让判断回到你。') with timeout 5000ms
+      - waiting for locator('[data-page="s06"]').getByText('让 AI 准备，让判断回到你。')
+
+
+      43 |     ];
+      44 |     for (const line of copy) {
+    > 45 |       await expect(root.getByText(line)).toBeVisible();
+         |                                          ^
+      46 |     }
+      47 |     await expect(root.getByRole("button", { name: "同意这个取舍" })).toBeVisible();
+      48 |     await expect(root.getByRole("button", { name: "我有不同判断" })).toBeVisible();
+        at /Users/chillbit/Proj/leubai-v2/tests/groupB.spec.ts:45:42
+
+    Error Context: test-results/groupB-s06-workspace-s06-renders-draft-workspace-copy-desktop/error-context.md
+
+
+(node:16523) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[2/11] [desktop] › tests/groupB.spec.ts:53:3 › s06 workspace › s06 confirm flow respects draft state machine
+  2) [desktop] › tests/groupB.spec.ts:53:3 › s06 workspace › s06 confirm flow respects draft state machine 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: locator('[data-page="s06"]').locator('[data-draft-status]')
+    Expected substring: "待检查"
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toContainText" locator('[data-page="s06"]').locator('[data-draft-status]') with timeout 5000ms
+      - waiting for locator('[data-page="s06"]').locator('[data-draft-status]')
+
+
+      57 |     const status = root.locator("[data-draft-status]");
+      58 |     const confirm = root.getByRole("button", { name: "确认已检查的内容" });
+    > 59 |     await expect(status).toContainText("待检查");
+         |                          ^
+      60 |     await expect(confirm).toBeDisabled();
+      61 |     await expect(root.getByText("先完成切入点判断，才能确认已检查的内容。")).toBeVisible();
+      62 |     await root.getByRole("button", { name: "同意这个取舍" }).click();
+        at /Users/chillbit/Proj/leubai-v2/tests/groupB.spec.ts:59:26
+
+    Error Context: test-results/groupB-s06-workspace-s06-c-a591f-espects-draft-state-machine-desktop/error-context.md
+
+
+(node:16531) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[3/11] [desktop] › tests/groupB.spec.ts:75:3 › s06 workspace › s06 disagree judgment also unlocks partial confirmation
+  3) [desktop] › tests/groupB.spec.ts:75:3 › s06 workspace › s06 disagree judgment also unlocks partial confirmation 
+
+    Test timeout of 15000ms exceeded.
+
+    Error: locator.click: Test timeout of 15000ms exceeded.
+    Call log:
+      - waiting for locator('[data-page="s06"]').getByRole('button', { name: '我有不同判断' })
+
+
+      77 |     await page.goto("/workspace");
+      78 |     const root = page.locator('[data-page="s06"]');
+    > 79 |     await root.getByRole("button", { name: "我有不同判断" }).click();
+         |                                                        ^
+      80 |     await expect(root.locator("[data-draft-status]")).toContainText("部分确认");
+      81 |     await expect(root.getByText("已记录：你对切入点有不同判断。")).toBeVisible();
+      82 |     expect(errors).toEqual([]);
+        at /Users/chillbit/Proj/leubai-v2/tests/groupB.spec.ts:79:56
+
+    Error Context: test-results/groupB-s06-workspace-s06-d-c662c-nlocks-partial-confirmation-desktop/error-context.md
+
+
+(node:16552) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
