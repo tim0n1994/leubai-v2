@@ -1,0 +1,10 @@
+
+Running 3 tests using 1 worker
+
+(node:21869) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [desktop] › tests/groupB.spec.ts:13:3 › s06 workspace › s06 renders draft workspace copy (325ms)
+  ✓  2 [desktop] › tests/groupB.spec.ts:53:3 › s06 workspace › s06 confirm flow respects draft state machine (398ms)
+  ✓  3 [desktop] › tests/groupB.spec.ts:75:3 › s06 workspace › s06 disagree judgment also unlocks partial confirmation (280ms)
+
+  3 passed (1.6s)
