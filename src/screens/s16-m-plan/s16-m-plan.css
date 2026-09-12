@@ -1,0 +1,127 @@
+.s16 {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.s16-title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.s16-capacity {
+  margin: 0;
+  font-family: var(--font-latin);
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.s16-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 22px;
+  background: var(--surface);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-panel);
+}
+
+.s16-plan-title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 19px;
+  font-weight: 600;
+}
+
+.s16-range {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.s16-note {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.s16-delta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid var(--divider);
+  border-bottom: 1px solid var(--divider);
+}
+
+.s16-delta-label {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+.s16-delta-value {
+  margin: 2px 0 0;
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.s16-planb {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 22px;
+  background: var(--surface-2);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-md);
+}
+
+.s16-planb-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font: inherit;
+  font-weight: 600;
+}
+
+.s16-planb-toggle .is-open {
+  transform: rotate(180deg);
+}
+
+.s16-planb-static {
+  margin: 0;
+  font-size: 13px;
+  color: var(--warm);
+}
+
+.s16-planb-debt {
+  margin: 0;
+  font-size: 13px;
+  color: var(--warm);
+  font-weight: 600;
+}
+
+.s16-cta {
+  height: var(--btn-h-m);
+  border: none;
+  border-radius: 16px;
+  background: var(--graphite);
+  color: #fff;
+  font-size: 15px;
+}
+
+.s16-demo {
+  margin: 0;
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-2);
+}
