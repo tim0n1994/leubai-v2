@@ -1,0 +1,6 @@
+
+Running 1 test using 1 worker
+
+  ✓  1 [desktop] › tests/groupA.spec.ts:184:3 › [s05] 变更预览 · 有限授权 › approval is scoped to this task and nothing executes (456ms)
+
+  1 passed (1.1s)
