@@ -1,0 +1,50 @@
+.mchrome {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.mchrome-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px 6px;
+  font-family: var(--font-latin);
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.mchrome-sig {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mchrome-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 8px 20px 24px;
+}
+
+.mchrome-tabbar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid var(--divider);
+  background: var(--surface);
+}
+
+.mchrome-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 56px;
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.mchrome-tab.is-active {
+  color: var(--text);
+  font-weight: 600;
+}
