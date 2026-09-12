@@ -1,0 +1,9 @@
+
+Running 2 tests using 1 worker
+
+(node:22928) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [desktop] › tests/groupB.spec.ts:87:3 › s07 session › s07 renders checkpoint restore copy (378ms)
+  ✓  2 [desktop] › tests/groupB.spec.ts:122:3 › s07 session › s07 diff, dictation and defer paths work (491ms)
+
+  2 passed (1.5s)
