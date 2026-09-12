@@ -61,7 +61,7 @@ export function Shell({ children }: { children: ReactNode }) {
         <main className="shell-content">{children}</main>
         <footer className="shell-footer">
           <span>页面 {pageNumber} / 18</span>
-          <span>留白 V2 · 概念设计</span>
+          <span>界面为独立演示状态；不代表已连接、已执行或真实收益。</span>
         </footer>
       </div>
     </div>
