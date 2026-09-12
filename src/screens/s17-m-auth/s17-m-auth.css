@@ -1,0 +1,113 @@
+.s17 {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.s17-title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.s17-version {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+.s17-scope-label {
+  margin: 6px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.s17-scopes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.s17-scope {
+  background: var(--surface);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-sm);
+}
+
+.s17-scope-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+}
+
+.s17-scope-row input {
+  margin-top: 3px;
+  width: 20px;
+  height: 20px;
+  accent-color: var(--graphite);
+}
+
+.s17-scope-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.s17-scope-name {
+  font-size: 15px;
+}
+
+.s17-scope-desc {
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+.s17-exclude {
+  margin: 0;
+  font-size: 12px;
+  color: var(--warm);
+}
+
+.s17-used {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ok);
+}
+
+.s17-empty {
+  margin: 0;
+  font-size: 13px;
+  color: var(--warm);
+}
+
+.s17-approve {
+  height: var(--btn-h-m);
+  border: none;
+  border-radius: 16px;
+  background: var(--graphite);
+  color: #fff;
+  font-size: 15px;
+}
+
+.s17-approve:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.s17-back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  border: 1px solid var(--divider);
+  border-radius: 16px;
+  font-size: 14px;
+  color: var(--text-2);
+}
