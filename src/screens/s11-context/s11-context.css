@@ -1,0 +1,168 @@
+.s11 {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.s11-title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 42px;
+  font-weight: 600;
+  letter-spacing: 2px;
+}
+
+.s11-sub {
+  margin: 10px 0 0;
+  color: var(--text-2);
+  font-size: 17px;
+}
+
+.s11-tablist {
+  display: flex;
+  gap: 8px;
+}
+
+.s11-tab {
+  height: 40px;
+  padding: 0 18px;
+  border: 1px solid var(--divider);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.s11-tab.is-active {
+  border-color: var(--graphite);
+  background: var(--graphite);
+  color: #fff;
+}
+
+.s11-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  align-items: start;
+}
+
+.s11-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 28px;
+  background: var(--surface);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-panel);
+}
+
+.s11-panel-kicker {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 19px;
+  font-weight: 600;
+}
+
+.s11-badge {
+  margin: 0;
+  font-size: 12px;
+  color: var(--info);
+}
+
+.s11-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+
+.s11-card-line {
+  margin: 0;
+  font-size: 16px;
+}
+
+.s11-card-src {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+.s11-sources {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.s11-sources li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--divider);
+  font-size: 15px;
+}
+
+.s11-src-state {
+  font-size: 12px;
+  color: var(--ok);
+}
+
+.s11-src-state.is-off {
+  color: var(--warm);
+}
+
+.s11-note {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.s11-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.s11-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 14px;
+  background: var(--graphite);
+  color: #fff;
+  font-size: 14px;
+}
+
+.s11-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.s11-btn-ghost {
+  background: transparent;
+  border: 1px solid var(--divider);
+  color: var(--text);
+}
+
+.s11-reject-note {
+  margin: 0;
+  font-size: 13px;
+  color: var(--warm);
+}
+
+.s11-foot {
+  padding-top: 8px;
+  border-top: 1px solid var(--divider);
+  font-size: 12px;
+  color: var(--text-2);
+}
