@@ -1,0 +1,59 @@
+
+Running 2 tests using 1 worker
+
+(node:23283) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 [desktop] › tests/groupC.spec.ts:190:3 › [s13] 同步异常 · 未知与接管 › keeps unknowns explicit instead of claiming full protection (5.3s)
+(node:23295) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  2 [desktop] › tests/groupC.spec.ts:251:3 › [s13] 同步异常 · 未知与接管 › retry shows current action and honest result, takeover works (15.0s)
+
+
+  1) [desktop] › tests/groupC.spec.ts:190:3 › [s13] 同步异常 · 未知与接管 › keeps unknowns explicit instead of claiming full protection 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('[data-page="s13"]').getByRole('heading', { name: '不知道的时候，就说不知道。' })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" locator('[data-page="s13"]').getByRole('heading', { name: '不知道的时候，就说不知道。' }) with timeout 5000ms
+      - waiting for locator('[data-page="s13"]').getByRole('heading', { name: '不知道的时候，就说不知道。' })
+
+
+      197 |     await expect(
+      198 |       root.getByRole("heading", { name: "不知道的时候，就说不知道。" }),
+    > 199 |     ).toBeVisible();
+          |       ^
+      200 |     await expect(
+      201 |       root.getByText("数据未同步不等于没有安排。外部保护未核验，就保持待确认。"),
+      202 |     ).toBeVisible();
+        at /Users/chillbit/Proj/leubai-v2/tests/groupC.spec.ts:199:7
+
+    Error Context: test-results/groupC--s13-同步异常-·-未知与接管-k-c16bd-of-claiming-full-protection-desktop/error-context.md
+
+  2) [desktop] › tests/groupC.spec.ts:251:3 › [s13] 同步异常 · 未知与接管 › retry shows current action and honest result, takeover works 
+
+    Test timeout of 15000ms exceeded.
+
+    Error: locator.click: Test timeout of 15000ms exceeded.
+    Call log:
+      - waiting for locator('[data-page="s13"]').getByRole('button', { name: '重新同步与核验' })
+
+
+      254 |     await page.goto("/sync");
+      255 |     const root = page.locator('[data-page="s13"]');
+    > 256 |     await root.getByRole("button", { name: "重新同步与核验" }).click();
+          |                                                         ^
+      257 |     await expect(
+      258 |       root.getByText("正在重新同步个人日历并核对冲突。"),
+      259 |     ).toBeVisible();
+        at /Users/chillbit/Proj/leubai-v2/tests/groupC.spec.ts:256:57
+
+    Error Context: test-results/groupC--s13-同步异常-·-未知与接管-r-81407-onest-result-takeover-works-desktop/error-context.md
+
+  2 failed
+    [desktop] › tests/groupC.spec.ts:190:3 › [s13] 同步异常 · 未知与接管 › keeps unknowns explicit instead of claiming full protection 
+    [desktop] › tests/groupC.spec.ts:251:3 › [s13] 同步异常 · 未知与接管 › retry shows current action and honest result, takeover works 

@@ -1,0 +1,35 @@
+
+Running 1 test using 1 worker
+
+(node:22545) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 [desktop] › tests/groupC.spec.ts:386:3 › [s16] 移动端 · 自适应方案 › plan A shows estimate honestly, plan B never counts as savings (5.1s)
+
+
+  1) [desktop] › tests/groupC.spec.ts:386:3 › [s16] 移动端 · 自适应方案 › plan A shows estimate honestly, plan B never counts as savings 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('[data-page="s16"]')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" locator('[data-page="s16"]') with timeout 5000ms
+      - waiting for locator('[data-page="s16"]')
+
+
+      390 |     await page.goto("/m/plan");
+      391 |     const root = page.locator('[data-page="s16"]');
+    > 392 |     await expect(root).toBeVisible();
+          |                        ^
+      393 |     await expect(
+      394 |       root.getByRole("heading", { name: "不挤掉自己，换一种做法。" }),
+      395 |     ).toBeVisible();
+        at /Users/chillbit/Proj/leubai-v2/tests/groupC.spec.ts:392:24
+
+    Error Context: test-results/groupC--s16-移动端-·-自适应方案-pl-23c07-n-B-never-counts-as-savings-desktop/error-context.md
+
+  1 failed
+    [desktop] › tests/groupC.spec.ts:386:3 › [s16] 移动端 · 自适应方案 › plan A shows estimate honestly, plan B never counts as savings 

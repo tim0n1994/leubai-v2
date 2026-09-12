@@ -1,0 +1,61 @@
+[WebServer] (node:20508) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 2 tests using 1 worker
+
+(node:20510) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 [desktop] › tests/groupC.spec.ts:13:3 › [s11] 私人上下文 · 来源与推测 › renders intent, inference, and sources with honest boundaries (5.4s)
+(node:20522) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  2 [desktop] › tests/groupC.spec.ts:94:3 › [s11] 私人上下文 · 来源与推测 › tabs switch panels and rejected inference is marked (15.0s)
+
+
+  1) [desktop] › tests/groupC.spec.ts:13:3 › [s11] 私人上下文 · 来源与推测 › renders intent, inference, and sources with honest boundaries 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('[data-page="s11"]').getByRole('heading', { name: '了解你，不等于占有你。' })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" locator('[data-page="s11"]').getByRole('heading', { name: '了解你，不等于占有你。' }) with timeout 5000ms
+      - waiting for locator('[data-page="s11"]').getByRole('heading', { name: '了解你，不等于占有你。' })
+
+
+      20 |     await expect(
+      21 |       root.getByRole("heading", { name: "了解你，不等于占有你。" }),
+    > 22 |     ).toBeVisible();
+         |       ^
+      23 |     await expect(
+      24 |       root.getByText("事实、意图与系统推测分开保存。你可以修正，也可以带走。"),
+      25 |     ).toBeVisible();
+        at /Users/chillbit/Proj/leubai-v2/tests/groupC.spec.ts:22:7
+
+    Error Context: test-results/groupC--s11-私人上下文-·-来源与推测--3e7f1-rces-with-honest-boundaries-desktop/error-context.md
+
+  2) [desktop] › tests/groupC.spec.ts:94:3 › [s11] 私人上下文 · 来源与推测 › tabs switch panels and rejected inference is marked 
+
+    Test timeout of 15000ms exceeded.
+
+    Error: locator.click: Test timeout of 15000ms exceeded.
+    Call log:
+      - waiting for locator('[data-page="s11"]').getByRole('tab', { name: '事实与来源' })
+
+
+       97 |     await page.goto("/context");
+       98 |     const root = page.locator('[data-page="s11"]');
+    >  99 |     await root.getByRole("tab", { name: "事实与来源" }).click();
+          |                                                    ^
+      100 |     await expect(root.getByText("已接入的来源与范围")).toBeVisible();
+      101 |     await root.getByRole("tab", { name: "系统推测" }).click();
+      102 |     await expect(root.getByText("你可能更愿意从修改草稿开始。")).toBeVisible();
+        at /Users/chillbit/Proj/leubai-v2/tests/groupC.spec.ts:99:52
+
+    Error Context: test-results/groupC--s11-私人上下文-·-来源与推测--8e7ab-ejected-inference-is-marked-desktop/error-context.md
+
+  2 failed
+    [desktop] › tests/groupC.spec.ts:13:3 › [s11] 私人上下文 · 来源与推测 › renders intent, inference, and sources with honest boundaries 
+    [desktop] › tests/groupC.spec.ts:94:3 › [s11] 私人上下文 · 来源与推测 › tabs switch panels and rejected inference is marked 

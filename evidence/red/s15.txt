@@ -1,0 +1,35 @@
+
+Running 1 test using 1 worker
+
+(node:22439) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 [desktop] › tests/groupC.spec.ts:340:3 › [s15] 移动端 · 此刻 › shows one protected hour and one decision (5.2s)
+
+
+  1) [desktop] › tests/groupC.spec.ts:340:3 › [s15] 移动端 · 此刻 › shows one protected hour and one decision 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('[data-page="s15"]')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" locator('[data-page="s15"]') with timeout 5000ms
+      - waiting for locator('[data-page="s15"]')
+
+
+      342 |     await page.goto("/m/now");
+      343 |     const root = page.locator('[data-page="s15"]');
+    > 344 |     await expect(root).toBeVisible();
+          |                        ^
+      345 |     await expect(root.getByText("17:00")).toBeVisible();
+      346 |     await expect(root.getByText("9 月 12 日 · 星期六")).toBeVisible();
+      347 |     await expect(
+        at /Users/chillbit/Proj/leubai-v2/tests/groupC.spec.ts:344:24
+
+    Error Context: test-results/groupC--s15-移动端-·-此刻-shows-4174c-ected-hour-and-one-decision-desktop/error-context.md
+
+  1 failed
+    [desktop] › tests/groupC.spec.ts:340:3 › [s15] 移动端 · 此刻 › shows one protected hour and one decision 
