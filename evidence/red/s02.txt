@@ -1,0 +1,61 @@
+[WebServer] (node:15928) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 2 tests using 1 worker
+
+(node:15929) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 [desktop] › tests/groupA.spec.ts:54:3 › [s02] 时间账本 · 责任与边界 › ledger stays internally consistent and protects blank time (5.3s)
+(node:15941) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  2 [desktop] › tests/groupA.spec.ts:88:3 › [s02] 时间账本 · 责任与边界 › week view is an honest empty state with sources (15.0s)
+
+
+  1) [desktop] › tests/groupA.spec.ts:54:3 › [s02] 时间账本 · 责任与边界 › ledger stays internally consistent and protects blank time 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('[data-page="s02"]').getByRole('heading', { name: '时间有去向，也有边界。' })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" locator('[data-page="s02"]').getByRole('heading', { name: '时间有去向，也有边界。' }) with timeout 5000ms
+      - waiting for locator('[data-page="s02"]').getByRole('heading', { name: '时间有去向，也有边界。' })
+
+
+      61 |     await expect(
+      62 |       root.getByRole("heading", { name: "时间有去向，也有边界。" }),
+    > 63 |     ).toBeVisible();
+         |       ^
+      64 |     await expect(root.getByText("19:00 前可用")).toBeVisible();
+      65 |     await expect(root.getByText("120 分钟").first()).toBeVisible();
+      66 |     await expect(root.getByText("当前预计投入").first()).toBeVisible();
+        at /Users/chillbit/Proj/leubai-v2/tests/groupA.spec.ts:63:7
+
+    Error Context: test-results/groupA--s02-时间账本-·-责任与边界-l-99b52-ent-and-protects-blank-time-desktop/error-context.md
+
+  2) [desktop] › tests/groupA.spec.ts:88:3 › [s02] 时间账本 · 责任与边界 › week view is an honest empty state with sources 
+
+    Test timeout of 15000ms exceeded.
+
+    Error: locator.click: Test timeout of 15000ms exceeded.
+    Call log:
+      - waiting for locator('[data-page="s02"]').getByRole('button', { name: '本周' })
+
+
+      90 |     await page.goto("/ledger");
+      91 |     const root = page.locator('[data-page="s02"]');
+    > 92 |     await root.getByRole("button", { name: "本周" }).click();
+         |                                                    ^
+      93 |     await expect(root.getByText("本周还没有可核验的汇总。")).toBeVisible();
+      94 |     await expect(root.getByText("数据来源：工作日历、任务清单。")).toBeVisible();
+      95 |     expect(errors).toEqual([]);
+        at /Users/chillbit/Proj/leubai-v2/tests/groupA.spec.ts:92:52
+
+    Error Context: test-results/groupA--s02-时间账本-·-责任与边界-w-ad2d7-st-empty-state-with-sources-desktop/error-context.md
+
+  2 failed
+    [desktop] › tests/groupA.spec.ts:54:3 › [s02] 时间账本 · 责任与边界 › ledger stays internally consistent and protects blank time 
+    [desktop] › tests/groupA.spec.ts:88:3 › [s02] 时间账本 · 责任与边界 › week view is an honest empty state with sources 

@@ -1,0 +1,37 @@
+[WebServer] (node:15847) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 1 test using 1 worker
+
+(node:15851) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 [desktop] › tests/groupA.spec.ts:13:3 › [s01] 此刻 · 时间主权 › shows protected time, capacity gap, and navigates to plan (5.4s)
+
+
+  1) [desktop] › tests/groupA.spec.ts:13:3 › [s01] 此刻 · 时间主权 › shows protected time, capacity gap, and navigates to plan 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('[data-page="s01"]').getByRole('heading', { name: '把今晚，留给自己。' })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" locator('[data-page="s01"]').getByRole('heading', { name: '把今晚，留给自己。' }) with timeout 5000ms
+      - waiting for locator('[data-page="s01"]').getByRole('heading', { name: '把今晚，留给自己。' })
+
+
+      20 |     await expect(
+      21 |       root.getByRole("heading", { name: "把今晚，留给自己。" }),
+    > 22 |     ).toBeVisible();
+         |       ^
+      23 |     await expect(root.getByText("19:00 — 20:00")).toBeVisible();
+      24 |     await expect(
+      25 |       root.getByText("不自动填入工作。暂时没有用途，也成立。"),
+        at /Users/chillbit/Proj/leubai-v2/tests/groupA.spec.ts:22:7
+
+    Error Context: test-results/groupA--s01-此刻-·-时间主权-show-a09c2-y-gap-and-navigates-to-plan-desktop/error-context.md
+
+  1 failed
+    [desktop] › tests/groupA.spec.ts:13:3 › [s01] 此刻 · 时间主权 › shows protected time, capacity gap, and navigates to plan 

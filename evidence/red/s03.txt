@@ -1,0 +1,37 @@
+[WebServer] (node:16021) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 1 test using 1 worker
+
+(node:16022) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 [desktop] › tests/groupA.spec.ts:100:3 › [s03] 收件箱 · 请求不等于承诺 › a request stays a request until you accept it (5.2s)
+
+
+  1) [desktop] › tests/groupA.spec.ts:100:3 › [s03] 收件箱 · 请求不等于承诺 › a request stays a request until you accept it 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('[data-page="s03"]').getByRole('heading', { name: '先理解，再成为责任。' })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" locator('[data-page="s03"]').getByRole('heading', { name: '先理解，再成为责任。' }) with timeout 5000ms
+      - waiting for locator('[data-page="s03"]').getByRole('heading', { name: '先理解，再成为责任。' })
+
+
+      105 |     await expect(
+      106 |       root.getByRole("heading", { name: "先理解，再成为责任。" }),
+    > 107 |     ).toBeVisible();
+          |       ^
+      108 |     await expect(root.getByText("竞品分析 · 会议提及")).toBeVisible();
+      109 |     await expect(root.getByText("下周碰一次方案")).toBeVisible();
+      110 |     await expect(root.getByText("找个晚上练琴")).toBeVisible();
+        at /Users/chillbit/Proj/leubai-v2/tests/groupA.spec.ts:107:7
+
+    Error Context: test-results/groupA--s03-收件箱-·-请求不等于承诺--75787-request-until-you-accept-it-desktop/error-context.md
+
+  1 failed
+    [desktop] › tests/groupA.spec.ts:100:3 › [s03] 收件箱 · 请求不等于承诺 › a request stays a request until you accept it 

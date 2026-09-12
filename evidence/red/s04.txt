@@ -1,0 +1,66 @@
+[WebServer] (node:16102) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 2 tests using 1 worker
+
+(node:16103) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 [desktop] › tests/groupA.spec.ts:137:3 › [s04] 自适应方案 · 改变方法与分工 › plan A selection navigates to preview (5.2s)
+(node:16113) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  2 [desktop] › tests/groupA.spec.ts:170:3 › [s04] 自适应方案 · 改变方法与分工 › plan B delay preview does not claim savings (5.2s)
+
+
+  1) [desktop] › tests/groupA.spec.ts:137:3 › [s04] 自适应方案 · 改变方法与分工 › plan A selection navigates to preview 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('[data-page="s04"]').getByRole('heading', { name: '换一种做法，不挤掉自己。' })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" locator('[data-page="s04"]').getByRole('heading', { name: '换一种做法，不挤掉自己。' }) with timeout 5000ms
+      - waiting for locator('[data-page="s04"]').getByRole('heading', { name: '换一种做法，不挤掉自己。' })
+
+
+      142 |     await expect(
+      143 |       root.getByRole("heading", { name: "换一种做法，不挤掉自己。" }),
+    > 144 |     ).toBeVisible();
+          |       ^
+      145 |     await expect(
+      146 |       root.getByText("19:00 前可用 120 分钟；当前预计投入 130 分钟。"),
+      147 |     ).toBeVisible();
+        at /Users/chillbit/Proj/leubai-v2/tests/groupA.spec.ts:144:7
+
+    Error Context: test-results/groupA--s04-自适应方案-·-改变方法与分-df646-ection-navigates-to-preview-desktop/error-context.md
+
+  2) [desktop] › tests/groupA.spec.ts:170:3 › [s04] 自适应方案 · 改变方法与分工 › plan B delay preview does not claim savings 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('[data-page="s04"]').getByText('不会算作节省时间')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" locator('[data-page="s04"]').getByText('不会算作节省时间') with timeout 5000ms
+      - waiting for locator('[data-page="s04"]').getByText('不会算作节省时间')
+
+
+      172 |     await page.goto("/plan");
+      173 |     const root = page.locator('[data-page="s04"]');
+    > 174 |     await expect(root.getByText("不会算作节省时间")).toBeVisible();
+          |                                              ^
+      175 |     await root.getByRole("button", { name: /预览延期的影响/ }).click();
+      176 |     await expect(page).toHaveURL(/\/preview$/);
+      177 |     const preview = page.locator('[data-page="s05"]');
+        at /Users/chillbit/Proj/leubai-v2/tests/groupA.spec.ts:174:46
+
+    Error Context: test-results/groupA--s04-自适应方案-·-改变方法与分-c8889-view-does-not-claim-savings-desktop/error-context.md
+
+  2 failed
+    [desktop] › tests/groupA.spec.ts:137:3 › [s04] 自适应方案 · 改变方法与分工 › plan A selection navigates to preview 
+    [desktop] › tests/groupA.spec.ts:170:3 › [s04] 自适应方案 · 改变方法与分工 › plan B delay preview does not claim savings 
