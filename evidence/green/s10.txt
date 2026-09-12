@@ -1,0 +1,9 @@
+
+Running 2 tests using 1 worker
+
+(node:24902) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [desktop] › tests/groupB.spec.ts:245:3 › s10 boundaries › s10 renders permission boundary copy (334ms)
+  ✓  2 [desktop] › tests/groupB.spec.ts:286:3 › s10 boundaries › s10 category panels and pause state work (544ms)
+
+  2 passed (1.5s)
