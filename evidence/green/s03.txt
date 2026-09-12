@@ -1,0 +1,6 @@
+
+Running 1 test using 1 worker
+
+  ✓  1 [desktop] › tests/groupA.spec.ts:98:3 › [s03] 收件箱 · 请求不等于承诺 › a request stays a request until you accept it (472ms)
+
+  1 passed (1.1s)
