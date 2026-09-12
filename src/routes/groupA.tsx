@@ -1,5 +1,6 @@
 import type { RouteGroup } from "./types";
 import { S01Now } from "../screens/s01-now/S01Now";
+import { S02Ledger } from "../screens/s02-ledger/S02Ledger";
 
 function ScreenStub({ id, title }: { id: string; title: string }) {
   return (
@@ -13,7 +14,7 @@ function ScreenStub({ id, title }: { id: string; title: string }) {
 export const groupA: RouteGroup = {
   shell: [
     { path: "/", element: <S01Now /> },
-    { path: "/ledger", element: <ScreenStub id="s02" title="时间账本 · 责任与边界" /> },
+    { path: "/ledger", element: <S02Ledger /> },
     { path: "/inbox", element: <ScreenStub id="s03" title="收件箱 · 请求不等于承诺" /> },
     { path: "/plan", element: <ScreenStub id="s04" title="自适应方案 · 改变方法与分工" /> },
     { path: "/preview", element: <ScreenStub id="s05" title="变更预览 · 有限授权" /> },
