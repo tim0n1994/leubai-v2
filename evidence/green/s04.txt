@@ -1,0 +1,6 @@
+
+Running 1 test using 1 worker
+
+  ✓  1 [desktop] › tests/groupA.spec.ts:135:3 › [s04] 自适应方案 · 改变方法与分工 › plan A selection navigates to preview (409ms)
+
+  1 passed (1.0s)
