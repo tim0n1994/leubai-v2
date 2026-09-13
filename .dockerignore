@@ -1,0 +1,13 @@
+.git
+node_modules
+dist
+.leubai-local
+.env
+.env.*
+*.local
+.omo
+test-results
+evidence
+docs
+design
+*.log
