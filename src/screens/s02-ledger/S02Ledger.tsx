@@ -22,6 +22,7 @@ import {
   formatMinuteOfDay,
   formatSourceSyncText,
   selectCapacityView,
+  selectMonthSurface,
   selectSourceRows,
   selectTimelineSurface,
   selectWeekSurface,
@@ -113,7 +114,7 @@ function S02Ready({ store }: { store: DomainStore }) {
   const navigate = useNavigate();
   const location = useLocation();
   const state = useDomainState(store);
-  const [view, setView] = useState<"today" | "week">("today");
+  const [view, setView] = useState<"today" | "week" | "month">("today");
   const [selectedCommitmentId, setSelectedCommitmentId] =
     useState<EntityId | null>(null);
   const context = resolveLedgerContext(state, new URLSearchParams(location.search));
@@ -131,6 +132,7 @@ function S02Ready({ store }: { store: DomainStore }) {
     trackHeightPx: 630,
   });
   const week = selectWeekSurface(state, weekDatesContaining(date));
+  const month = view === "month" ? selectMonthSurface(state, date) : null;
   const sources = selectSourceRows(state);
   const timezone = state.ruleset.timezone;
   const selectedDetail =
@@ -179,6 +181,14 @@ function S02Ready({ store }: { store: DomainStore }) {
               onClick={() => setView("week")}
             >
               本周
+            </button>
+            <button
+              type="button"
+              aria-pressed={view === "month"}
+              className={view === "month" ? "is-on" : ""}
+              onClick={() => setView("month")}
+            >
+              本月
             </button>
           </div>
           <span className="s02-tz">
@@ -421,7 +431,7 @@ function S02Ready({ store }: { store: DomainStore }) {
               ) : null}
             </div>
           )
-        ) : (
+        ) : view === "week" ? (
           <div className="s02-week">
             <ol className="s02-week-list">
               {week.days.map((day) => (
@@ -468,7 +478,59 @@ function S02Ready({ store }: { store: DomainStore }) {
               数据来源：本机已保存的领域记录（{timezone}），不包含未接入来源。
             </p>
           </div>
-        )}
+        ) : month ? (
+          <div className="s02-month" data-month-label={month.label}>
+            <p className="s02-month-label">{month.label}</p>
+            <div className="s02-month-grid" role="table" aria-label={month.label + "逐日汇总"}>
+              <div className="s02-month-head" role="row">
+                {["周一", "周二", "周三", "周四", "周五", "周六", "周日"].map((d) => (
+                  <span key={d} role="columnheader">{d}</span>
+                ))}
+              </div>
+              {month.weeks.map((weekDays, weekIndex) => (
+                <div key={weekIndex} className="s02-month-row" role="row">
+                  {weekDays.map((day) => {
+                    const inMonth = day.date.slice(5, 7) === String(month.month).padStart(2, "0");
+                    const isLinked = context.block !== null && day.date === date;
+                    return (
+                      <div
+                        key={day.date}
+                        role="cell"
+                        className={
+                          "s02-month-cell" +
+                          (inMonth ? "" : " is-outside") +
+                          (day.hasStoredRecords ? "" : " is-unknown") +
+                          (isLinked ? " is-linked" : "")
+                        }
+                        data-month-date={day.date}
+                        data-has-records={day.hasStoredRecords ? "true" : "false"}
+                      >
+                        <span className="s02-month-cell-date" aria-current={isLinked ? "date" : undefined}>
+                          {Number(day.date.slice(8, 10))}
+                        </span>
+                        {day.hasStoredRecords ? (
+                          <span className="s02-month-cell-detail">
+                            {day.commitmentCount > 0 ? day.commitmentCount + " 项" : ""}
+                            {day.protectedCount > 0 ? (day.commitmentCount > 0 ? " · " : "") + day.protectedCount + " 段留白" : ""}
+                            {day.overlapMinutes > 0 ? " · 越界 " + day.overlapMinutes + " 分" : ""}
+                          </span>
+                        ) : (
+                          <span className="s02-month-cell-detail">无记录</span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+            <p className="s02-month-note">
+              本月只汇总已保存的本地记录；没有记录的日期覆盖未知，不代表空闲。
+            </p>
+            <p className="s02-month-src">
+              数据来源：本机已保存的领域记录（{timezone}），不包含未接入来源。
+            </p>
+          </div>
+        ) : null}
       </article>
 
       <div className="s02-side">
