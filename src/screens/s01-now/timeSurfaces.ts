@@ -486,35 +486,85 @@ export interface WeekSurfaceView {
   daysWithoutRecords: number;
 }
 
+function selectDayView(state: DomainState, date: string): WeekDayView {
+  const commitments = selectCommitmentsOnDate(state, date);
+  const protectedCount = selectProtectedIntervals(state, date).length;
+  const unknownEffortCount = commitments.filter(
+    (c) => c.effortEstimateMinutes === null,
+  ).length;
+  const knownEffortMinutes = commitments.reduce(
+    (sum, c) => sum + (c.effortEstimateMinutes ?? 0),
+    0,
+  );
+  return {
+    date,
+    weekdayLabel: WEEKDAY_LABELS[weekdayIndexOf(date)],
+    commitmentCount: commitments.length,
+    knownEffortMinutes,
+    unknownEffortCount,
+    protectedCount,
+    overlapMinutes: totalOverlapMinutes(selectProtectedOverlaps(state, date)),
+    hasStoredRecords: commitments.length > 0 || protectedCount > 0,
+  };
+}
+
 export function selectWeekSurface(
   state: DomainState,
   dates: string[],
 ): WeekSurfaceView {
-  const days: WeekDayView[] = dates.map((date) => {
-    const commitments = selectCommitmentsOnDate(state, date);
-    const protectedCount = selectProtectedIntervals(state, date).length;
-    const unknownEffortCount = commitments.filter(
-      (c) => c.effortEstimateMinutes === null,
-    ).length;
-    const knownEffortMinutes = commitments.reduce(
-      (sum, c) => sum + (c.effortEstimateMinutes ?? 0),
-      0,
-    );
-    return {
-      date,
-      weekdayLabel: WEEKDAY_LABELS[weekdayIndexOf(date)],
-      commitmentCount: commitments.length,
-      knownEffortMinutes,
-      unknownEffortCount,
-      protectedCount,
-      overlapMinutes: totalOverlapMinutes(selectProtectedOverlaps(state, date)),
-      hasStoredRecords: commitments.length > 0 || protectedCount > 0,
-    };
-  });
+  const days = dates.map((date) => selectDayView(state, date));
   return {
     weekStartDate: dates[0],
     weekEndDate: dates[dates.length - 1],
     days,
+    daysWithoutRecords: days.filter((day) => !day.hasStoredRecords).length,
+  };
+}
+
+export function monthGridDates(anchorDate: string): string[] {
+  const base = new Date(anchorDate + "T00:00:00Z");
+  const year = base.getUTCFullYear();
+  const month = base.getUTCMonth();
+  const firstIso = new Date(Date.UTC(year, month, 1)).toISOString().slice(0, 10);
+  const leading = weekdayIndexOf(firstIso);
+  const lastDay = new Date(Date.UTC(year, month + 1, 0));
+  const weeks = Math.ceil((leading + lastDay.getUTCDate()) / 7);
+  const gridStart = new Date(firstIso + "T00:00:00Z");
+  gridStart.setUTCDate(gridStart.getUTCDate() - leading);
+  const dates: string[] = [];
+  for (let i = 0; i < weeks * 7; i += 1) {
+    const day = new Date(gridStart);
+    day.setUTCDate(gridStart.getUTCDate() + i);
+    dates.push(day.toISOString().slice(0, 10));
+  }
+  return dates;
+}
+
+export interface MonthSurfaceView {
+  year: number;
+  month: number;
+  label: string;
+  weeks: WeekDayView[][];
+  daysWithoutRecords: number;
+}
+
+export function selectMonthSurface(
+  state: DomainState,
+  anchorDate: string,
+): MonthSurfaceView {
+  const days = monthGridDates(anchorDate).map((date) =>
+    selectDayView(state, date),
+  );
+  const weeks: WeekDayView[][] = [];
+  for (let i = 0; i < days.length; i += 7) weeks.push(days.slice(i, i + 7));
+  const base = new Date(anchorDate + "T00:00:00Z");
+  const year = base.getUTCFullYear();
+  const monthNumber = base.getUTCMonth() + 1;
+  return {
+    year,
+    month: monthNumber,
+    label: year + " 年 " + monthNumber + " 月",
+    weeks,
     daysWithoutRecords: days.filter((day) => !day.hasStoredRecords).length,
   };
 }
