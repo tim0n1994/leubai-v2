@@ -4,6 +4,17 @@
   gap: 24px;
 }
 
+.s11-intent-editor, .s11-intent-editor fieldset { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.s11-intent-editor fieldset { padding: 0; border: 0; }
+.s11-intent-editor label { display: flex; flex-direction: column; gap: 6px; min-width: 0; font-size: 14px; }
+.s11-intent-editor input, .s11-intent-editor textarea { width: 100%; box-sizing: border-box; min-width: 0; padding: 10px 12px; border: 1px solid var(--divider); border-radius: 8px; background: var(--surface); color: var(--text-1); font: inherit; }
+.s11-intent-editor textarea { min-height: 96px; resize: vertical; }
+.s11-intent-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; }
+.s11-intent-constraint { display: flex; flex-wrap: wrap; align-items: end; gap: 8px; }
+.s11-intent-constraint label { flex: 1 1 160px; }
+.s11-intent-delete { padding: 12px; border: 1px solid var(--divider); border-radius: 8px; }
+.s11-intent-card .s11-actions { flex-wrap: wrap; }
+
 .s11-title {
   margin: 0;
   font-family: var(--font-serif);
@@ -20,30 +31,84 @@
 
 .s11-tablist {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
+  grid-area: tabs;
+  padding: 28px 36px 0;
 }
 
 .s11-tab {
   height: 40px;
   padding: 0 18px;
   border: 1px solid var(--divider);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--surface);
   font-size: 14px;
   color: var(--text-2);
 }
 
 .s11-tab.is-active {
-  border-color: var(--graphite);
-  background: var(--graphite);
-  color: #fff;
+  border-color: var(--divider);
+  background: color-mix(in srgb, var(--info) 12%, var(--surface));
+  color: var(--text);
 }
 
 .s11-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 24px;
+  grid-template-columns: minmax(0, 1.85fr) minmax(0, 1fr);
+  grid-template-areas: "tabs sources" "intent sources" "inference sources";
+  gap: 0 24px;
   align-items: start;
+  position: relative;
+  isolation: isolate;
+}
+
+.s11-grid::before {
+  content: "";
+  grid-column: 1;
+  grid-row: 1 / 4;
+  align-self: stretch;
+  background: var(--surface);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-panel);
+  z-index: -1;
+  pointer-events: none;
+}
+
+#context-intent {
+  grid-area: intent;
+}
+
+#context-inference {
+  grid-area: inference;
+}
+
+#context-intent,
+#context-inference {
+  padding: 28px 36px 36px;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+#context-sources {
+  grid-area: sources;
+  align-self: stretch;
+}
+
+.s11-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.s11-source-panel {
+  flex: 1;
+}
+
+.s11-grid > * {
+  min-width: 0;
 }
 
 .s11-panel {
@@ -130,6 +195,41 @@
   gap: 10px;
 }
 
+.s11-export-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  min-width: 0;
+  margin: 0;
+  padding: 12px 16px 16px;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+
+.s11-export-options legend {
+  padding: 0 6px;
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.s11-export-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.s11-export-option input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--graphite);
+  cursor: pointer;
+}
+
 .s11-btn {
   display: inline-flex;
   align-items: center;
@@ -165,4 +265,16 @@
   border-top: 1px solid var(--divider);
   font-size: 12px;
   color: var(--text-2);
+}
+
+@media (max-width: 1000px) {
+  .s11-grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "tabs" "intent" "inference" "sources";
+    row-gap: 0;
+  }
+
+  #context-sources {
+    margin-top: 24px;
+  }
 }

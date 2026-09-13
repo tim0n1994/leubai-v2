@@ -216,7 +216,12 @@ test.describe("[s05] 变更预览 · 有限授权", () => {
     await expect(root.getByText("任何参数改变，都重新检查")).toBeVisible();
     await root.getByRole("button", { name: /批准并准备草稿/ }).click();
     await expect(root.getByText("已批准 · 本次准备任务")).toBeVisible();
-    await expect(root.getByText("尚未执行")).toBeVisible();
+    const draftBox = root.getByRole("textbox", { name: "草稿正文" });
+    await expect(draftBox).toBeVisible();
+    await expect(root.getByText("本地草稿 · 待检查")).toBeVisible();
+    await expect(root.getByText(/来源：产品说明（示例）/)).toBeVisible();
+    await expect(root.getByText(/访谈节选（示例）/)).toBeVisible();
+    await expect(root.getByText("尚未执行")).toHaveCount(0);
     await root.getByRole("button", { name: "返回修改方案" }).click();
     await expect(page).toHaveURL(/\/plan$/);
     expect(errors).toEqual([]);

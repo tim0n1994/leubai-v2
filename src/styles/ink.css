@@ -1,0 +1,139 @@
+html[data-theme='ink'] {
+  --bg: #F5F1E8;
+  --surface: #FCFAF5;
+  --surface-2: #F3EFE5;
+  --text: #282A27;
+  --text-2: #706D64;
+  --divider: #DCD5C8;
+  --info: #A44335;
+  --ok: #56685A;
+  --warm: #7A6636;
+  --graphite: #282A27;
+  --focus: #A44335;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-pill: 10px;
+  --radius-control: 10px;
+
+  --shadow-panel: 0 2px 6px rgba(40, 42, 39, 0.05), 0 20px 48px rgba(40, 42, 39, 0.08);
+  --shadow-btn: 0 6px 16px rgba(40, 42, 39, 0.12);
+
+  --ink-accent-cinnabar: #A44335;
+  --ink-accent-gold: #AD9360;
+  --ink-accent-bamboo: #819081;
+  --ink-transition-feedback: 200ms;
+  --ink-transition-panel: 280ms;
+}
+
+html[data-theme='ink'] body {
+  font-variant-numeric: tabular-nums;
+  transition:
+    background-color var(--ink-transition-feedback) ease,
+    color var(--ink-transition-feedback) ease;
+}
+
+html[data-theme='ink'] body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.07;
+  background-repeat: repeat;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+}
+
+/* The .shell element re-declares these same variables in shell.css, which wins
+   over values inherited from html; re-declare them on .shell itself. */
+html[data-theme='ink'] .shell {
+  --shell-rail-bg: rgba(252, 250, 245, 0.92);
+  --shell-rail-border: rgba(220, 213, 200, 0.65);
+  --shell-rail-shadow: 0 18px 40px rgba(40, 42, 39, 0.06);
+  --shell-active-backing: #EFE9DC;
+  --shell-avatar-bg: #E7E0D0;
+  --shell-avatar-bg-hover: #DDD5C2;
+}
+
+html[data-theme='ink'] .shell-rail {
+  backdrop-filter: none;
+  transition:
+    background-color var(--ink-transition-panel) ease,
+    border-color var(--ink-transition-panel) ease,
+    box-shadow var(--ink-transition-panel) ease;
+}
+
+html[data-theme='ink'] #shell-mark-silver stop:nth-child(1) { stop-color: #8F8B7F; }
+html[data-theme='ink'] #shell-mark-silver stop:nth-child(2) { stop-color: #C9C4B6; }
+html[data-theme='ink'] #shell-mark-silver stop:nth-child(3) { stop-color: #6F6B60; }
+
+html[data-theme='ink'] .s01-hero-ring {
+  border-width: 1.5px;
+  border-color: rgba(111, 107, 96, 0.3);
+  box-shadow: none;
+  z-index: 0;
+}
+
+/* Keep the thin ring behind readable hero content; positioning only, no layout change. */
+html[data-theme='ink'] .s01-hero > :not(.s01-hero-ring) {
+  position: relative;
+  z-index: 1;
+}
+
+html[data-theme='ink'] .s02-block.is-meeting { background: #E9E4D8; }
+html[data-theme='ink'] .s02-block.is-report { background: #F1EDE2; }
+html[data-theme='ink'] .s02-block.is-admin {
+  background: #F2EBE0;
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(122, 102, 54, 0.12) 0 6px,
+    transparent 6px 14px
+  );
+}
+html[data-theme='ink'] .s10-status-locked { background: #EDE8DE; }
+html[data-theme='ink'] .s10-status-warm { background: rgba(122, 102, 54, 0.14); }
+
+html[data-theme='ink'] [data-page='s01'],
+html[data-theme='ink'] [data-page='s08'],
+html[data-theme='ink'] [data-page='s18'] {
+  position: relative;
+}
+
+html[data-theme='ink'] [data-page='s01']::after,
+html[data-theme='ink'] [data-page='s08']::after,
+html[data-theme='ink'] [data-page='s18']::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 132px;
+  z-index: -1;
+  pointer-events: none;
+  background-repeat: no-repeat;
+  background-position: bottom center;
+  background-size: 100% 132px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 132' fill='none' preserveAspectRatio='none'%3E%3Cpath d='M-20 126 L140 76 L260 110 L400 58 L540 116 L660 84 L800 126 L920 82 L1060 120 L1190 68 L1330 114 L1460 86' stroke='%236F6B60' stroke-opacity='0.35' stroke-width='1.6' stroke-linejoin='round'/%3E%3Cpath d='M-20 130 L170 102 L330 122 L490 92 L650 120 L830 98 L990 124 L1150 102 L1310 122 L1460 108' stroke='%23819081' stroke-opacity='0.26' stroke-width='1.2' stroke-linejoin='round'/%3E%3C/svg%3E");
+  -webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.9) 30%, transparent);
+  mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.9) 30%, transparent);
+}
+
+@media (max-width: 900px), (max-height: 700px) {
+  html[data-theme='ink'] [data-page='s01']::after,
+  html[data-theme='ink'] [data-page='s08']::after,
+  html[data-theme='ink'] [data-page='s18']::after {
+    display: none;
+  }
+
+  html[data-theme='ink'] .s01-hero-ring {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme='ink'] body,
+  html[data-theme='ink'] .shell-rail {
+    transition: none;
+  }
+}

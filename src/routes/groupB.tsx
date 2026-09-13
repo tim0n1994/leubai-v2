@@ -9,9 +9,8 @@ export const groupB: RouteGroup = {
   shell: [
     { path: "/workspace", element: <WorkspaceScreen /> },
     { path: "/session", element: <SessionScreen /> },
-    { path: "/blank", element: <BlankScreen /> },
     { path: "/attention", element: <AttentionScreen /> },
     { path: "/boundaries", element: <BoundariesScreen /> },
   ],
-  bare: [],
+  bare: [{ path: "/blank", element: <BlankScreen /> }],
 };

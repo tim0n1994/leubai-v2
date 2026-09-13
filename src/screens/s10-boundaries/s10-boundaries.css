@@ -20,7 +20,7 @@
 
 .s10-layout {
   display: grid;
-  grid-template-columns: 300px minmax(0, 1fr);
+  grid-template-columns: minmax(280px, 24%) minmax(0, 1fr);
   gap: 28px;
   align-items: start;
 }
@@ -110,7 +110,7 @@
   height: 50px;
   padding: 0 30px;
   border: none;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--graphite);
   color: #fff;
   font-size: 16px;
@@ -126,7 +126,7 @@
   height: 50px;
   padding: 0 26px;
   border: 1px solid var(--divider);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--surface);
   font-size: 16px;
   cursor: pointer;
@@ -173,7 +173,7 @@
   height: 36px;
   padding: 0 18px;
   border: 1px solid var(--divider);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--surface-2);
   color: var(--text-2);
   font-size: 13px;
@@ -220,7 +220,7 @@
   align-items: center;
   height: 30px;
   padding: 0 14px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-size: 13px;
 }
 
@@ -293,4 +293,144 @@
   margin: 10px 0 0;
   color: var(--warm);
   font-size: 15px;
+}
+
+.s10-rule-note {
+  margin: 8px 0 0;
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+.s10-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.s10-check input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--graphite);
+}
+
+.s10-check input:disabled {
+  cursor: wait;
+}
+
+.s10-history-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.s10-blocks {
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.s10-blocks li {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px 20px;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+
+.s10-capacity {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 22px;
+  padding: 20px 24px;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+}
+
+.s10-capacity-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.s10-capacity-field input {
+  width: 140px;
+  height: 46px;
+  padding: 0 14px;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-size: 16px;
+}
+
+.s10-capacity-error {
+  margin: 0;
+  width: 100%;
+  color: var(--warm);
+  font-size: 14px;
+}
+
+.s10-capacity .s10-rule-note {
+  width: 100%;
+}
+
+.s10-error {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 20px 26px;
+  border: 1px solid rgba(149, 108, 67, 0.35);
+  border-radius: var(--radius-md);
+  background: rgba(149, 108, 67, 0.08);
+}
+
+.s10-error-title {
+  margin: 0;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.s10-error-reason {
+  margin: 0;
+  font-size: 14px;
+}
+
+.s10-error-note {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+.s10-error-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.s10-error-actions .s10-btn-ghost {
+  height: 44px;
+  font-size: 14px;
+}
+
+.s10-budget-meta {
+  margin: 16px 0 0;
+  color: var(--text-2);
+  font-size: 14px;
 }

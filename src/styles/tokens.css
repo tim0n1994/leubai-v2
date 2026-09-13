@@ -1,5 +1,27 @@
 /* 留白 V2 — design tokens (source: design/UIUX_交互规范.md §02) */
 :root {
+  --reference-hero-height: 508px;
+  --reference-section-lead: 40px;
+  --reference-ledger-ratio: 2.73fr;
+  --reference-boundary-track: 400px;
+  --reference-serif-weight: 400;
+  --reference-session-height: 840px;
+  --reference-session-ring: 380px;
+  --reference-quiet-primary: 244px;
+  --reference-quiet-secondary: 254px;
+  --reference-action-height: 60px;
+  --reference-review-value-width: 240px;
+  --reference-review-value-size: 34px;
+  --reference-alert-size: 38px;
+  --reference-section-title: 24px;
+  --reference-sync-action: 292px;
+  --reference-sync-alert-height: 200px;
+  --reference-sync-source-height: 480px;
+  --reference-compact-stack: 16px;
+  --reference-capture-measure: 13em;
+  --reference-mobile-comparison: 62px;
+  --reference-mobile-comparison-gap: 20px;
+  --reference-number-weight: 600;
   --bg: #F3F5F6;
   --text: #232C32;
   --text-2: #65727B;
@@ -10,10 +32,12 @@
   --surface: #FFFFFF;
   --surface-2: #FAFCFC;
   --graphite: #2F3B42;
-  --focus: #7A9FBA;
+  --focus: #426D92;
   --radius-sm: 24px;
   --radius-md: 28px;
   --radius-lg: 34px;
+  --radius-pill: 999px;
+  --radius-control: 16px;
   --btn-h: 54px;
   --btn-h-m: 50px;
   --font-serif: "Noto Serif CJK SC", "Songti SC", "STSong", "SimSun", serif;
@@ -21,4 +45,8 @@
   --font-latin: Inter, "Helvetica Neue", Arial, sans-serif;
   --shadow-panel: 0 18px 50px rgba(35, 44, 50, 0.06);
   --shadow-btn: 0 10px 24px rgba(35, 44, 50, 0.16);
+}
+
+html:not([data-theme="ink"]) [data-page] h1 {
+  font-weight: var(--reference-serif-weight);
 }
