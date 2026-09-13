@@ -28,8 +28,8 @@ function passwordInput(input) {
 }
 function nameInput(input, fallback) {
   if (input === undefined) return fallback;
-  if (typeof input !== "string" || !input.trim() || input.trim().length > 80) fail(400, "INVALID_NAME", "称呼需为 1–80 个字符。");
-  return input.trim();
+  if (typeof input !== "string" || input.trim().length > 80) fail(400, "INVALID_NAME", "称呼需为 1–80 个字符。");
+  return input.trim() || fallback;
 }
 function publicUser(row) {
   return { id: row.id, email: row.email, displayName: row.display_name, createdAt: row.created_at, role: row.role, emailVerified: true, isActive: Boolean(row.is_active), settings: JSON.parse(row.settings_json) };

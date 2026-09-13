@@ -190,7 +190,7 @@ test("invalid fields do not consume a valid code and concurrent registration cre
   const issued = await f.request("/api/auth/send-code", { method: "POST", body: { email: "alice@example.test" } });
   const body = { email: "alice@example.test", code: issued.body.devCode, password: PASSWORD };
   assert.equal((await f.request("/api/auth/register", { method: "POST", body: { ...body, password: "short" } })).body.error, "INVALID_PASSWORD");
-  assert.equal((await f.request("/api/auth/register", { method: "POST", body: { ...body, displayName: "" } })).body.error, "INVALID_NAME");
+  assert.equal((await f.request("/api/auth/register", { method: "POST", body: { ...body, displayName: "x".repeat(81) } })).body.error, "INVALID_NAME");
   const results = await Promise.all([f.request("/api/auth/register", { method: "POST", body }), f.request("/api/auth/register", { method: "POST", body })]);
   assert.deepEqual(results.map((result) => result.status).sort(), [200, 400]);
   assert.equal(results.find((result) => result.status === 400).body.error, "INVALID_CODE");
@@ -227,6 +227,17 @@ test("unconfigured email blocks registration with an actionable status", async (
   assert.equal(status.body.registrationEnabled, false);
   assert.equal(status.body.emailDelivery, "unavailable");
   assert.equal((await f.request("/api/auth/send-code", { method: "POST", body: { email: "alice@example.test" } })).status, 503);
+});
+
+test("empty optional displayName falls back instead of failing registration", async (t) => {
+  const f = await fixture(t);
+  await f.request("/api/auth/send-code", { method: "POST", body: { email: "alice@example.test" } });
+  const response = await f.request("/api/auth/register", { method: "POST", body: { email: "alice@example.test", code: f.sent.at(-1).code, password: PASSWORD, displayName: "" } });
+  assert.equal(response.status, 200);
+  assert.equal(response.body.user.displayName, "alice");
+  const update = await f.request("/api/auth/me", { method: "PUT", body: { displayName: "  " }, cookie: response.cookie });
+  assert.equal(update.status, 200);
+  assert.equal(update.body.user.displayName, "alice");
 });
 
 test("resend adapter uses the configured sender, does not follow redirects and hides provider failure detail", async () => {
