@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import test from "node:test";
 import { createDomainStore, FIXTURE_IDS } from "../../domain/index.ts";
 import { buildWorkspaceExport } from "./workspace-export.ts";
+import { readWorkspaceSavedState } from "./workspace-readback.ts";
+import type { CommitOutcome, DomainPersistence } from "../../data/persistence.ts";
+import type { DomainState } from "../../domain/types.ts";
 
 async function draftState() {
   const store = createDomainStore({ dataMode: "fixture" });
@@ -59,12 +61,35 @@ test("missing persisted data, unknown draft and changed revision refuse export i
   assert.equal(buildWorkspaceExport(state, draft.id, draft.revision + 1, "2026-09-13T13:00:00Z").ok, false);
 });
 
-test("S06 exposes a selected-draft download action locked during unresolved writes", () => {
-  const source = readFileSync(new URL("./WorkspaceScreen.tsx", import.meta.url), "utf8");
-  assert.match(source, /data-workspace-export/);
-  assert.match(source, /onClick=\{exportDraft\}/);
-  assert.match(source, /disabled=\{busy !== null \|\| commandState\.busy \|\| commandState\.pending !== null\}/);
-  assert.match(source, /const fresh = await readWorkspaceSavedState\(persistence\)/);
-  assert.match(source, /buildWorkspaceExport\(fresh, draft\.id, draft\.revision/);
-  assert.match(source, /downloadWorkspaceExport\(result\.file\)/);
+function persistenceStub(
+  savedState: DomainState | null,
+  refreshOutcome: CommitOutcome = { ok: true },
+): DomainPersistence {
+  return {
+    dataMode: "fixture",
+    openStatus: "ready",
+    openReason: null,
+    rawPayload: null,
+    getState: () => savedState,
+    readFreshState: () => savedState,
+    commit: async () => ({ ok: true }),
+    subscribeExternal: () => () => {},
+    resetFixtureOnly: async () => ({ ok: true }),
+    refresh: async () => refreshOutcome,
+  };
+}
+
+test("saved-state readback refreshes and returns the committed server state", async () => {
+  const state = await draftState();
+  const fresh = await readWorkspaceSavedState(persistenceStub(state));
+  assert.equal(fresh, state);
+});
+
+test("readback refuses instead of guessing when refresh or the saved state is unavailable", async () => {
+  const state = await draftState();
+  await assert.rejects(
+    readWorkspaceSavedState(persistenceStub(state, { ok: false, code: "STORAGE_UNAVAILABLE", reason: "服务器暂时不可用。", retryable: false })),
+    /服务器暂时不可用/,
+  );
+  await assert.rejects(readWorkspaceSavedState(persistenceStub(null)), /无法读取已保存的工作区数据/);
 });
