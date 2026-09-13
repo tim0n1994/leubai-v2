@@ -1,19 +1,26 @@
 .s16 {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 20px;
 }
 
 .s16-title {
   margin: 0;
   font-family: var(--font-serif);
-  font-size: 28px;
+  font-size: 34px;
+  line-height: 1.45;
   font-weight: 600;
   letter-spacing: 1px;
 }
 
 .s16-capacity {
   margin: 0;
+  align-self: stretch;
+  text-align: center;
+  padding: 10px 15px;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
   font-family: var(--font-latin);
   font-size: 14px;
   color: var(--text-2);
@@ -22,8 +29,8 @@
 .s16-card {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 22px;
+  gap: 14px;
+  padding: 24px;
   background: var(--surface);
   border: 1px solid var(--divider);
   border-radius: var(--radius-md);
@@ -32,17 +39,39 @@
 
 .s16-plan-title {
   margin: 0;
+  width: min(100%, 272px);
+  text-align: center;
+  align-self: flex-start;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--info) 10%, var(--surface));
   font-family: var(--font-serif);
-  font-size: 19px;
+  font-size: 15px;
   font-weight: 600;
+  color: var(--info);
 }
 
 .s16-range {
   margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
   font-family: var(--font-serif);
-  font-size: 24px;
-  font-weight: 600;
+  font-size: 26px;
+  line-height: 1.2;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
 }
+
+.s16-range.is-comparison { font-size: 54px; }
+html:not([data-theme="ink"]) .s16-range.is-comparison {
+  font-size: var(--reference-mobile-comparison);
+  gap: var(--reference-mobile-comparison-gap);
+  font-weight: var(--reference-number-weight);
+}
+.s16-range-arrow { font-size: 36px; font-weight: 400; color: var(--text-2); }
+.s16-range-unit { font-family: var(--font-sans); font-size: 17px; }
 
 .s16-note {
   margin: 0;
@@ -52,21 +81,22 @@
 
 .s16-delta {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  padding: 12px 0;
+  gap: 18px;
+  padding: 20px 0;
   border-top: 1px solid var(--divider);
   border-bottom: 1px solid var(--divider);
 }
 
+.s16-delta > div { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; }
+
 .s16-delta-label {
   margin: 0;
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text-2);
 }
 
 .s16-delta-value {
-  margin: 2px 0 0;
+  margin: 0;
   font-family: var(--font-serif);
   font-size: 20px;
   font-weight: 600;
@@ -76,7 +106,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 16px 22px;
+  padding: 22px 24px;
   background: var(--surface-2);
   border: 1px solid var(--divider);
   border-radius: var(--radius-md);
@@ -111,12 +141,20 @@
 }
 
 .s16-cta {
-  height: var(--btn-h-m);
+  min-height: 56px;
+  padding: 12px 18px;
   border: none;
-  border-radius: 16px;
+  border-radius: var(--radius-control);
   background: var(--graphite);
   color: #fff;
-  font-size: 15px;
+  font-size: 17px;
+}
+
+.s16-planb-auth {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
 }
 
 .s16-demo {

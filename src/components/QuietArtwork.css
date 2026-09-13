@@ -1,0 +1,152 @@
+.quiet-art {
+  --qa-band-a: #e3ecf4;
+  --qa-band-b: #c2d4e4;
+  --qa-band-c: #eaf1f8;
+  --qa-band-fade: rgba(226, 236, 244, 0);
+  --qa-sheen: rgba(255, 255, 255, 0.9);
+  --qa-sheen-fade: rgba(255, 255, 255, 0);
+  --qa-rim: rgba(74, 102, 128, 0.12);
+  --qa-hairline: var(--qa-sheen);
+  --qa-disk-a: #ffffff;
+  --qa-disk-b: #dde6ee;
+  --qa-disk-c: #c9d6e2;
+  --qa-disk-edge: rgba(255, 255, 255, 0.85);
+  --qa-ground: rgba(35, 44, 50, 0.09);
+  --qa-ground-transparent: rgba(35, 44, 50, 0);
+  pointer-events: none;
+  user-select: none;
+}
+
+.quiet-art-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+html:not([data-theme="ink"]) .quiet-art {
+  --qa-reference-tilt: 22deg;
+  --qa-reference-width: .93;
+  --qa-reference-soft: 16;
+  --qa-reference-mid: 8;
+  --qa-reference-core: 3;
+}
+html:not([data-theme="ink"]) .quiet-art-bands {
+  transform-box: view-box;
+  transform-origin: 280px 278px;
+  transform: rotate(var(--qa-reference-tilt)) scaleX(var(--qa-reference-width));
+}
+html:not([data-theme="ink"]) .quiet-art-band {
+  transform-box: view-box;
+  transform-origin: 280px 278px;
+  transform: scaleX(-1);
+}
+
+.quiet-art-ink-only {
+  display: none;
+}
+
+.quiet-art .quiet-art-band-a { stop-color: var(--qa-band-a); }
+.quiet-art .quiet-art-band-b { stop-color: var(--qa-band-b); }
+.quiet-art .quiet-art-band-c { stop-color: var(--qa-band-c); }
+.quiet-art .quiet-art-band-fade { stop-color: var(--qa-band-fade); }
+.quiet-art .quiet-art-sheen-a { stop-color: var(--qa-sheen); }
+.quiet-art .quiet-art-sheen-b { stop-color: var(--qa-sheen-fade); }
+.quiet-art .quiet-art-disk-a { stop-color: var(--qa-disk-a); }
+.quiet-art .quiet-art-disk-b { stop-color: var(--qa-disk-b); }
+.quiet-art .quiet-art-disk-c { stop-color: var(--qa-disk-c); }
+.quiet-art .quiet-art-ground-a { stop-color: var(--qa-ground); }
+.quiet-art .quiet-art-ground-b { stop-color: var(--qa-ground-transparent); }
+
+.quiet-art-band-soft {
+  stroke-width: 26;
+  filter: blur(1px);
+}
+
+.quiet-art-band-mid {
+  stroke-width: 16;
+}
+
+.quiet-art-band-core {
+  stroke-width: 8;
+}
+
+html:not([data-theme="ink"]) .quiet-art-band-soft { stroke-width: var(--qa-reference-soft); }
+html:not([data-theme="ink"]) .quiet-art-band-mid { stroke-width: var(--qa-reference-mid); }
+html:not([data-theme="ink"]) .quiet-art-band-core { stroke-width: var(--qa-reference-core); }
+
+.quiet-art-sheen {
+  stroke-width: 2;
+  stroke-linecap: butt;
+}
+
+.quiet-art-edge {
+  stroke: var(--qa-sheen);
+  stroke-width: 1.5;
+}
+
+.quiet-art-rim {
+  stroke: var(--qa-rim);
+  stroke-width: 1.5;
+}
+
+.quiet-art-hairline {
+  stroke: var(--qa-hairline);
+  stroke-width: 1;
+}
+
+.quiet-art-disk {
+  stroke: var(--qa-disk-edge);
+  stroke-width: 1;
+  filter: drop-shadow(0 10px 14px rgba(35, 44, 50, 0.12));
+}
+
+/* Ink theme: same hierarchy, paper-and-ink palette, thin open contour,
+   no heavy ring and no porcelain glow. */
+html[data-theme="ink"] .quiet-art {
+  --qa-band-a: rgba(40, 42, 39, 0.02);
+  --qa-band-b: rgba(40, 42, 39, 0.32);
+  --qa-band-c: rgba(40, 42, 39, 0.12);
+  --qa-band-fade: rgba(40, 42, 39, 0);
+  --qa-sheen: rgba(40, 42, 39, 0);
+  --qa-sheen-fade: rgba(40, 42, 39, 0);
+  --qa-rim: rgba(40, 42, 39, 0.34);
+  --qa-hairline: rgba(40, 42, 39, 0.28);
+  --qa-disk-a: #fcfaf5;
+  --qa-disk-b: #f3efe5;
+  --qa-disk-c: #e7e1d2;
+  --qa-disk-edge: rgba(40, 42, 39, 0.45);
+  --qa-ground: rgba(40, 42, 39, 0.06);
+  --qa-ground-transparent: rgba(40, 42, 39, 0);
+}
+
+html[data-theme="ink"] .quiet-art-band {
+  stroke-width: 3;
+}
+
+html[data-theme="ink"] .quiet-art-band-soft,
+html[data-theme="ink"] .quiet-art-band-mid,
+html[data-theme="ink"] .quiet-art-band-core,
+html[data-theme="ink"] .quiet-art-sheen {
+  filter: none;
+}
+
+html[data-theme="ink"] .quiet-art-sheen {
+  display: none;
+}
+
+html[data-theme="ink"] .quiet-art-edge {
+  display: none;
+}
+
+html[data-theme="ink"] .quiet-art-porcelain-only {
+  display: none;
+}
+
+html[data-theme="ink"] .quiet-art-ink-only {
+  display: initial;
+}
+
+html[data-theme="ink"] .quiet-art-disk {
+  stroke-width: 1.25;
+  filter: none;
+}

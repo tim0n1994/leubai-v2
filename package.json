@@ -7,11 +7,15 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
+    "start": "node server/start.mjs",
+    "server": "LEUBAI_DEV=1 node server/start.mjs",
     "preview": "vite preview",
+    "test:unit": "node scripts/test-unit.mjs",
     "test:e2e": "playwright test"
   },
   "dependencies": {
     "lucide-react": "^1.45.0",
+    "nodemailer": "^10.0.9",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.3"

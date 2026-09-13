@@ -111,7 +111,7 @@
 .s03-entry-tag {
   align-self: flex-start;
   padding: 4px 12px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--surface);
   border: 1px solid var(--divider);
   font-size: 12px;
@@ -152,7 +152,7 @@
   align-items: center;
   gap: 8px;
   padding: 6px 14px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: rgba(149, 108, 67, 0.1);
   color: var(--warm);
   font-size: 13px;
@@ -241,7 +241,7 @@
   gap: 8px;
   margin: 8px 0 0;
   padding: 10px 18px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: rgba(77, 119, 113, 0.12);
   color: var(--ok);
   font-size: 15px;
@@ -266,7 +266,7 @@
   height: 56px;
   padding: 0 32px;
   border: none;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--graphite);
   color: #fff;
   font-size: 16px;
@@ -284,7 +284,7 @@
   height: 52px;
   padding: 0 28px;
   border: 1px solid var(--divider);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--surface);
   font-size: 15px;
 }
@@ -394,9 +394,186 @@
   gap: 8px;
   margin: 6px 0 0;
   padding: 8px 14px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--surface-2);
   border: 1px solid var(--divider);
   color: var(--text-2);
   font-size: 12px;
+}
+
+.s03-runtime {
+  margin: 0;
+  padding: 18px 22px;
+  border: 1px solid var(--divider);
+  border-radius: 18px;
+  background: var(--surface);
+  color: var(--text-2);
+  font-size: 14px;
+}
+
+.s03-runtime.is-error {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.s03-retry {
+  display: inline-flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 20px;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  font-size: 14px;
+  color: var(--text);
+}
+
+.s03-retry:disabled {
+  opacity: 0.6;
+}
+
+.s03-empty {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 36px 40px;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-panel);
+}
+
+.s03-empty-title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.s03-empty-note {
+  margin: 0;
+  max-width: 560px;
+  color: var(--text-2);
+  font-size: 14px;
+}
+
+.s03-empty-link {
+  align-self: flex-start;
+  margin-top: 8px;
+  color: var(--info);
+  font-size: 15px;
+}
+
+.s03-hint {
+  margin: 12px 0 0;
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+.s03-action-error {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+  margin-top: 16px;
+  padding: 16px 20px;
+  border: 1px solid var(--divider);
+  border-radius: 18px;
+  background: var(--surface-2);
+}
+
+.s03-action-error-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.s03-action-error-reason {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+.s03-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+  padding: 22px 24px;
+  border: 1px solid var(--divider);
+  border-radius: 20px;
+  background: var(--surface-2);
+}
+
+.s03-edit-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.s03-edit-note {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+.s03-edit-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.s03-edit-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 180px;
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.s03-edit-field input {
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--divider);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 14px;
+}
+
+.s03-edit-field input:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+.s03-edit-errors {
+  margin: 0;
+  padding: 0 0 0 18px;
+  color: var(--info);
+  font-size: 13px;
+}
+
+.s03-edit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+
+.s03-edit-readback {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+.s03-edit-saved {
+  margin: 0;
+  color: var(--ok);
+  font-size: 14px;
 }
