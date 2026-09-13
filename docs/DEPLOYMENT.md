@@ -34,13 +34,13 @@ cloudflared tunnel --config deploy/cloudflared.yml ingress validate
 cloudflared tunnel --config deploy/cloudflared.yml ingress rule https://leubai.udify.fun/
 ```
 
-认证验收通过后，在独立终端启动：
+自 2026-09-13 起应用与 connector 均由 launchd 专用服务托管（`com.udify.leubai-app`、`com.udify.leubai-connector`，plist 位于 `~/Library/LaunchAgents/`，KeepAlive + RunAtLoad）。日常启停入口为桌面 `留白启动.command`（自动 bootstrap/kickstart、dist 新鲜度检查、公网探测失败时自动重启 connector 最多 3 轮）。调试时可手动前台运行：
 
 ```sh
 cloudflared tunnel --config deploy/cloudflared.yml --no-autoupdate run
 ```
 
-此命令保持前台运行。按 `Ctrl-C` 只停止此 LeuBai connector；应用进程可独立停止。首次上线先保持前台可观测，随后再为 LeuBai 单独安装启动服务。不要使用无专用配置的 `cloudflared service install`，以免接管其他项目的共享服务。
+手动前台运行前先 `launchctl bootout gui/$(id -u)/com.udify.leubai-connector`，避免两个 connector 同时争用 metrics 端口 20246。按 `Ctrl-C` 只停止此前台实例；launchd 服务可独立 `kickstart`。不要使用无专用配置的 `cloudflared service install`，以免接管其他项目的共享服务。
 
 ## 验收与运维
 
@@ -60,7 +60,7 @@ curl --fail --silent --show-error https://leubai.udify.fun/ -o /dev/null
 
 ## 当前部署状态（2026-09-13）
 
-- 公网应用已上线：应用实例 `:5220`（`LEUBAI_PUBLIC_ORIGIN=https://leubai.udify.fun`、`LEUBAI_TRUST_CLOUDFLARE=1`、`EMAIL_TRANSPORT=disabled`），cloudflared connector 使用隧道 `9a9696a6-d825-4c79-8163-72f5fff4fd66`，DNS 已解析，公网 root/login 实测 200。验收环境变量位于 `.leubai-local/env`（不入库，`set -a` 后 source）。
+- 公网应用已上线：应用实例 `:5220`（`LEUBAI_PUBLIC_ORIGIN=https://leubai.udify.fun`、`LEUBAI_TRUST_CLOUDFLARE=1`、`EMAIL_TRANSPORT=resend`，密钥从 `.leubai-local/env` 的 `LEUBAI_SENDER_*` 前缀变量在服务启动时映射），cloudflared connector 使用隧道 `9a9696a6-d825-4c79-8163-72f5fff4fd66`，DNS 已解析，公网 root/login 实测 200。验收环境变量位于 `.leubai-local/env`（不入库）。
 - 本机验收另有 loopback 实例 `:5201`（`EMAIL_TRANSPORT=console`），仅用于本地开发验证码流程。
-- 公开注册保持关闭：未配置真实邮件通道前 `send-code` 返回 `EMAIL_UNAVAILABLE`。真实邮件收发未验证。
-- 应用与 connector 均为前台会话，尚未安装 launchd 持久化；本机睡眠、进程退出或断网都会中断公网可用性。撤回公网访问只需停止专用 connector。
+- 公开注册按 `EMAIL_TRANSPORT=resend` 真实发信（发送专用 Resend key，`LEUBAI_SENDER_*` 前缀隔离）。实际收件仍以用户确认邮箱为准。
+- 应用与 connector 已由 launchd 持久化托管（`com.udify.leubai-app`、`com.udify.leubai-connector`，KeepAlive + RunAtLoad，随登录自启），进程崩溃自动拉起；桌面 `留白启动.command` 负责开机后一键拉起与验证。本机睡眠或断网仍会中断公网可用性。撤回公网访问：`launchctl bootout gui/$(id -u)/com.udify.leubai-connector`。
