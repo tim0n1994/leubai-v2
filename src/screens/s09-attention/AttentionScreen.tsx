@@ -38,7 +38,6 @@ import {
   type QueueRow,
 } from "./attentionSurface.ts";
 
-const DATA_MODE = "fixture" as const;
 const RULES_ROUTE = "/boundaries?tab=打扰规则";
 const READBACK_UNVERIFIED_CODE = "STORAGE_READBACK_UNVERIFIED";
 
@@ -67,13 +66,13 @@ interface AttentionRuntimeProps {
 }
 
 function AttentionRuntime({ onRetrySettled }: AttentionRuntimeProps) {
-  const runtime = useDomainRuntime(DATA_MODE);
+  const runtime = useDomainRuntime();
   const [retrying, setRetrying] = useState(false);
 
   const retry = () => {
     if (retrying) return;
     setRetrying(true);
-    void retryDomainRuntime(DATA_MODE).finally(() => {
+    void retryDomainRuntime(runtime.dataMode).finally(() => {
       setRetrying(false);
       onRetrySettled();
     });

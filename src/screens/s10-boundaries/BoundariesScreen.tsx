@@ -38,7 +38,6 @@ import {
   type RulesRetryPlan,
 } from "./boundarySurface.ts";
 
-const DATA_MODE = "fixture" as const;
 
 const TABS = ["行动权限", "时间边界", "打扰规则", "暂停与退出"] as const;
 
@@ -117,13 +116,13 @@ interface BoundariesRuntimeProps {
 }
 
 function BoundariesRuntime({ tab, onTabChange, onRetrySettled }: BoundariesRuntimeProps) {
-  const runtime = useDomainRuntime(DATA_MODE);
+  const runtime = useDomainRuntime();
   const [retrying, setRetrying] = useState(false);
 
   const retry = () => {
     if (retrying) return;
     setRetrying(true);
-    void retryDomainRuntime(DATA_MODE).finally(() => {
+    void retryDomainRuntime(runtime.dataMode).finally(() => {
       setRetrying(false);
       onRetrySettled();
     });

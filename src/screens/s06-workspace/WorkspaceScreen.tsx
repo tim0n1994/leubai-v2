@@ -1,12 +1,11 @@
 import { useState, useSyncExternalStore } from "react";
 import { revealWorkspaceSection, workspaceSectionAnchor } from "./section-anchor.ts";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { getBrowserLocalStorage, readPersistedState } from "../../data/index.ts";
+import type { DomainPersistence } from "../../data/persistence.ts";
 import { useDomainState } from "../../data/react.ts";
 import { defaultUuid } from "../../domain/ids.ts";
 import type { DomainStore } from "../../domain/store.ts";
 import type {
-  DataMode,
   DomainCommand,
   DomainState,
   Draft,
@@ -15,9 +14,11 @@ import type {
   Operation,
 } from "../../domain/types.ts";
 import { retryDomainRuntime, useDomainRuntime } from "../../runtime/index.ts";
+import { BrowserWorkspaceRecoveryNotice } from "./BrowserWorkspaceRecoveryNotice.tsx";
 import { DraftAssistant } from "../../settings/DraftAssistant";
 import { workspaceCommands } from "./workspace-command.ts";
 import { buildWorkspaceExport, downloadWorkspaceExport } from "./workspace-export.ts";
+import { readWorkspaceSavedState } from "./workspace-readback.ts";
 import "./s06-workspace.css";
 
 const DRAFT_STATUS_WORDS: Partial<Record<Draft["status"], string>> = {
@@ -110,7 +111,6 @@ export function WorkspaceScreen() {
       </header>
       <WorkspaceRuntime
         key={runtimeEpoch}
-        dataMode="fixture"
         query={query}
         onRetrySettled={() => setRuntimeEpoch((epoch) => epoch + 1)}
       />
@@ -119,19 +119,18 @@ export function WorkspaceScreen() {
 }
 
 interface WorkspaceRuntimeProps {
-  dataMode: DataMode;
   query: WorkspaceQueryIds;
   onRetrySettled: () => void;
 }
 
-function WorkspaceRuntime({ dataMode, query, onRetrySettled }: WorkspaceRuntimeProps) {
-  const runtime = useDomainRuntime(dataMode);
+function WorkspaceRuntime({ query, onRetrySettled }: WorkspaceRuntimeProps) {
+  const runtime = useDomainRuntime();
   const [retrying, setRetrying] = useState(false);
 
   const retry = () => {
     if (retrying) return;
     setRetrying(true);
-    retryDomainRuntime(dataMode)
+    retryDomainRuntime(runtime.dataMode)
       .catch(() => {
         setRetrying(false);
       })
@@ -151,6 +150,7 @@ function WorkspaceRuntime({ dataMode, query, onRetrySettled }: WorkspaceRuntimeP
   if (runtime.status === "unavailable") {
     return (
       <div className="s06-boundary s06-boundary-error" data-runtime-state="unavailable">
+        <BrowserWorkspaceRecoveryNotice recovery={runtime.handle?.browserRecovery} />
         <h2>本地领域数据当前不可读</h2>
         <p data-runtime-reason>
           {runtime.handle && runtime.handle.status !== "ready"
@@ -176,10 +176,11 @@ function WorkspaceRuntime({ dataMode, query, onRetrySettled }: WorkspaceRuntimeP
   }
   return (
     <div data-runtime-state="ready">
+      <BrowserWorkspaceRecoveryNotice recovery={runtime.runtime.browserRecovery} />
       <WorkspaceCommandNotice store={runtime.runtime.store} />
       <WorkspaceReady
         store={runtime.runtime.store}
-        dataMode={runtime.runtime.dataMode}
+        persistence={runtime.runtime.persistence}
         query={query}
       />
     </div>
@@ -205,11 +206,11 @@ function WorkspaceCommandNotice({ store }: { store: DomainStore }) {
 
 interface WorkspaceReadyProps {
   store: DomainStore;
-  dataMode: DataMode;
+  persistence: DomainPersistence;
   query: WorkspaceQueryIds;
 }
 
-function WorkspaceReady({ store, dataMode, query }: WorkspaceReadyProps) {
+function WorkspaceReady({ store, persistence, query }: WorkspaceReadyProps) {
   const state = useDomainState(store);
   const { draftId, operationId, explicitEmptyId } = query;
 
@@ -234,7 +235,7 @@ function WorkspaceReady({ store, dataMode, query }: WorkspaceReadyProps) {
         </div>
       );
     }
-    return <WorkspaceDraft store={store} dataMode={dataMode} draft={selected} domain={state} />;
+    return <WorkspaceDraft store={store} persistence={persistence} draft={selected} domain={state} />;
   }
 
   if (!draftId || !operationId || explicitEmptyId) {
@@ -280,7 +281,7 @@ function WorkspaceReady({ store, dataMode, query }: WorkspaceReadyProps) {
   if (isWithdrawnDraft(draft)) {
     return <WorkspaceWithdrawn draft={draft} />;
   }
-  return <WorkspaceDraft store={store} dataMode={dataMode} draft={draft} domain={state} />;
+  return <WorkspaceDraft store={store} persistence={persistence} draft={draft} domain={state} />;
 }
 
 interface WorkspaceWithdrawnProps {
@@ -350,7 +351,7 @@ function WorkspaceWithdrawn({ draft }: WorkspaceWithdrawnProps) {
 
 interface WorkspaceDraftProps {
   store: DomainStore;
-  dataMode: DataMode;
+  persistence: DomainPersistence;
   draft: Draft;
   domain: DomainState;
 }
@@ -371,7 +372,7 @@ interface AssistantSnapshot {
   input: string;
 }
 
-function WorkspaceDraft({ store, dataMode, draft, domain }: WorkspaceDraftProps) {
+function WorkspaceDraft({ store, persistence, draft, domain }: WorkspaceDraftProps) {
   const navigate = useNavigate();
   const controller = workspaceCommands(store);
   const commandState = useSyncExternalStore(controller.subscribe, controller.getSnapshot);
@@ -393,6 +394,7 @@ function WorkspaceDraft({ store, dataMode, draft, domain }: WorkspaceDraftProps)
   const [withdrawStage, setWithdrawStage] = useState<{ draftId: EntityId; revision: number } | null>(null);
   const [withdrawReason, setWithdrawReason] = useState("");
   const [exportNotice, setExportNotice] = useState<{ ok: boolean; text: string } | null>(null);
+  const [readbackError, setReadbackError] = useState<string | null>(null);
 
   const commitment = domain.commitments[draft.commitmentId];
   const latestCheckpoint =
@@ -674,51 +676,59 @@ const registerMaterial = async () => {
     }
   };
 
-  const refreshReadback = () => {
-    if (controller.getSnapshot().pending || controller.getSnapshot().busy) return;
-    const storage = getBrowserLocalStorage();
-    if (!storage) return;
-    const fresh = readPersistedState(storage, dataMode);
-    if (fresh.kind === "ok") store.adoptExternalState(fresh.envelope.state);
+  const refreshReadback = async () => {
+    if (busy !== null || controller.getSnapshot().pending || controller.getSnapshot().busy) return;
+    setBusy("readback");
+    setReadbackError(null);
+    try {
+      store.adoptExternalState(await readWorkspaceSavedState(persistence));
+    } catch (error) {
+      setReadbackError(error instanceof Error ? error.message : String(error));
+    } finally {
+      setBusy(null);
+    }
   };
 
-  const exportDraft = () => {
+  const exportDraft = async () => {
     if (busy !== null || controller.getSnapshot().busy || controller.getSnapshot().pending !== null) return;
     setExportNotice(null);
+    setBusy("export");
     try {
-      const storage = getBrowserLocalStorage();
-      const fresh = storage ? readPersistedState(storage, dataMode) : null;
-      if (!fresh || fresh.kind !== "ok") {
-        setExportNotice({ ok: false, text: "无法确认已保存数据，未生成文件；请恢复本地存储读取后重试。" });
-        return;
-      }
-      const result = buildWorkspaceExport(fresh.envelope.state, draft.id, draft.revision, new Date().toISOString());
+      const fresh = await readWorkspaceSavedState(persistence);
+      const result = buildWorkspaceExport(fresh, draft.id, draft.revision, new Date().toISOString());
       if (!result.ok) { setExportNotice({ ok: false, text: result.reason }); return; }
       downloadWorkspaceExport(result.file);
       setExportNotice({ ok: true, text: "已生成 " + result.file.filename + " 并请求浏览器下载；请在下载列表检查文件。未发送或提交任何内容。" });
     } catch (error) {
-      setExportNotice({ ok: false, text: "导出未确认，请检查浏览器下载设置后重试：" + (error instanceof Error ? error.message : String(error)) });
+      setExportNotice({ ok: false, text: "导出未确认，请检查工作区连接或浏览器下载设置后重试：" + (error instanceof Error ? error.message : String(error)) });
+    } finally {
+      setBusy(null);
     }
   };
 
-  const rebaseSectionEdit = (section: DraftSection) => {
+  const rebaseSectionEdit = async (section: DraftSection) => {
     if (interactionsLocked || busy !== null) return;
-    const storage = getBrowserLocalStorage();
-    if (!storage) return;
-    const fresh = readPersistedState(storage, dataMode);
-    if (fresh.kind !== "ok") return;
-    const current = fresh.envelope.state.drafts[draft.id];
-    const currentSection = current?.sections.find(item => item.id === section.id);
-    if (!current || !currentSection || current.sentAt !== null || current.status === "withdrawn") return;
-    store.adoptExternalState(fresh.envelope.state);
-    const attempted = failure?.command;
-    setSectionEdits(previous => ({ ...previous, [section.id]: {
-      text: failure?.key.startsWith("assistant-apply:") && attempted?.type === "editDraftSection" ? attempted.content : previous[section.id]?.text ?? section.content,
-      capturedRevision: current.revision,
-      capturedContentVersion: currentSection.contentVersion,
-    } }));
-    setEditingSections(previous => ({ ...previous, [section.id]: true }));
-    setFailure(null);
+    setBusy("rebase");
+    setReadbackError(null);
+    try {
+      const fresh = await readWorkspaceSavedState(persistence);
+      const current = fresh.drafts[draft.id];
+      const currentSection = current?.sections.find(item => item.id === section.id);
+      if (!current || !currentSection || current.sentAt !== null || current.status === "withdrawn") return;
+      store.adoptExternalState(fresh);
+      const attempted = failure?.command;
+      setSectionEdits(previous => ({ ...previous, [section.id]: {
+        text: failure?.key.startsWith("assistant-apply:") && attempted?.type === "editDraftSection" ? attempted.content : previous[section.id]?.text ?? section.content,
+        capturedRevision: current.revision,
+        capturedContentVersion: currentSection.contentVersion,
+      } }));
+      setEditingSections(previous => ({ ...previous, [section.id]: true }));
+      setFailure(null);
+    } catch (error) {
+      setReadbackError(error instanceof Error ? error.message : String(error));
+    } finally {
+      setBusy(null);
+    }
   };
 
   return (
@@ -1247,6 +1257,7 @@ const registerMaterial = async () => {
         <button type="button" className="s06-btn-ghost s06-btn-wide" data-refresh-readback onClick={refreshReadback} disabled={busy !== null || interactionsLocked}>
           刷新读取已保存数据
         </button>
+        {readbackError && <p className="s06-error" role="alert" data-workspace-readback-error>{readbackError}</p>}
         <p className="s06-note-center">确认后仍不会自动发送或提交</p>
       </aside>
     </div>

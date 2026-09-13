@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { parseLlmSettingsText } from "./parser";
+import { parseLlmSettingsText, suggestLlmEndpoints } from "./parser";
 import { applySaveSuccess, type ProofState } from "./saveState";
 import { AppearanceSettings } from "../appearance/AppearanceSettings";
 import {
@@ -55,6 +55,7 @@ export function SettingsPage({ embedded = false }: { embedded?: boolean }) {
   const [form, setForm] = useState<SettingsForm>(EMPTY_FORM);
   const [paste, setPaste] = useState("");
   const [pasteErrors, setPasteErrors] = useState<string[]>([]);
+  const [pasteMessage, setPasteMessage] = useState<string | null>(null);
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<LlmTestResult | null>(null);
   const [testError, setTestError] = useState<string | null>(null);
@@ -64,6 +65,8 @@ export function SettingsPage({ embedded = false }: { embedded?: boolean }) {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [disconnecting, setDisconnecting] = useState(false);
   const formRef = useRef(form);
+  const editedRef = useRef(false);
+  const operationRef = useRef(false);
 
   useEffect(() => {
     formRef.current = form;
@@ -86,6 +89,11 @@ export function SettingsPage({ embedded = false }: { embedded?: boolean }) {
       if (!active) return;
       setMeta(next);
       setMetaError(null);
+      if (!editedRef.current && (next.protocol === "openai" || next.protocol === "anthropic")) {
+        const restored: SettingsForm = { protocol: next.protocol, baseUrl: next.baseUrl, messagesUrl: next.messagesUrl, modelsUrl: next.modelsUrl, model: next.model, apiKey: "" };
+        formRef.current = restored;
+        setForm(restored);
+      }
     }, err => {
       if (!active) return;
       const code = err instanceof LlmApiError ? err.code : "request_failed";
@@ -95,13 +103,22 @@ export function SettingsPage({ embedded = false }: { embedded?: boolean }) {
   }, []);
 
   const proofValid = proof !== null && JSON.stringify(form) === proof.formSnapshot;
+  const working = testing || saving || disconnecting;
 
   const updateField = (field: keyof SettingsForm, value: string) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
+    editedRef.current = true;
+    const next = { ...formRef.current, [field]: value };
+    formRef.current = next;
+    setForm(next);
+    setSaveMessage(null);
+    setSaveError(null);
   };
 
   const handleParse = () => {
     const parsed = parseLlmSettingsText(paste);
+    setPasteErrors(parsed.errors);
+    setPasteMessage(null);
+    if (parsed.errors.length > 0) return;
     const updates: Partial<SettingsForm> = {};
     if (parsed.protocol === "anthropic" || parsed.protocol === "openai") {
       updates.protocol = parsed.protocol;
@@ -112,10 +129,24 @@ export function SettingsPage({ embedded = false }: { embedded?: boolean }) {
         updates[field] = value;
       }
     }
-    setPasteErrors(parsed.errors);
     if (Object.keys(updates).length > 0) {
-      setForm((prev) => ({ ...prev, ...updates }));
+      const next = { ...EMPTY_FORM, ...updates };
+      if (!parsed.protocol && parsed.messagesUrl?.includes("/chat/completions")) next.protocol = "openai";
+      const suggested = suggestLlmEndpoints(next.baseUrl, next.protocol);
+      if (suggested) {
+        next.messagesUrl ||= suggested.messagesUrl;
+        next.modelsUrl ||= suggested.modelsUrl;
+      }
+      editedRef.current = true;
+      formRef.current = next;
+      setForm(next);
       setPaste("");
+      setProof(null);
+      setTestResult(null);
+      setTestError(null);
+      setSaveMessage(null);
+      setSaveError(null);
+      setPasteMessage("已填入新配置，请确认协议、地址与模型后测试连接。密钥不会保存在浏览器中。");
     }
   };
 
@@ -128,13 +159,18 @@ export function SettingsPage({ embedded = false }: { embedded?: boolean }) {
   ].filter((v): v is string => Boolean(v));
 
   const handleTest = async () => {
-    if (testing) return;
+    if (operationRef.current) return;
     if (missingFields.length > 0) {
       setTestError("请先完整填写：" + missingFields.join("、"));
       setTestResult(null);
       return;
     }
+    operationRef.current = true;
     setTesting(true);
+    setProof(null);
+    setTestResult(null);
+    setSaveMessage(null);
+    setSaveError(null);
     setTestError(null);
     try {
       const result = await testLlmCandidate(
@@ -160,11 +196,13 @@ export function SettingsPage({ embedded = false }: { embedded?: boolean }) {
       setTestError(describeLlmError(code));
     } finally {
       setTesting(false);
+      operationRef.current = false;
     }
   };
 
   const handleSave = async () => {
-    if (!proofValid || saving || !proof) return;
+    if (!proofValid || operationRef.current || !proof) return;
+    operationRef.current = true;
     const submittedForm = form;
     const submittedSnapshot = JSON.stringify(submittedForm);
     const proofToken = proof.token;
@@ -202,11 +240,13 @@ export function SettingsPage({ embedded = false }: { embedded?: boolean }) {
       setSaveError(describeLlmError(code));
     } finally {
       setSaving(false);
+      operationRef.current = false;
     }
   };
 
   const handleDisconnect = async () => {
-    if (disconnecting) return;
+    if (operationRef.current) return;
+    operationRef.current = true;
     setDisconnecting(true);
     try {
       await disconnectLlm();
@@ -220,6 +260,7 @@ export function SettingsPage({ embedded = false }: { embedded?: boolean }) {
       setSaveError(describeLlmError(code));
     } finally {
       setDisconnecting(false);
+      operationRef.current = false;
     }
   };
 
@@ -267,12 +308,14 @@ export function SettingsPage({ embedded = false }: { embedded?: boolean }) {
       </section>
       <section className="settings-section" aria-label="粘贴配置">
         <h2 className="settings-section-title">粘贴配置</h2>
-        <p className="settings-hint">支持「标签: 值」与 Markdown 链接，例如 Base URL: [http://…](http://…)</p>
+        <p className="settings-hint">支持标签文本、Markdown 链接、JSON 和环境变量。解析会替换当前草稿；缺少的常用端点会根据协议补全，请核对后测试。</p>
         <textarea
           className="settings-textarea"
           data-testid="settings-paste"
           aria-label="粘贴 LLM 配置文本"
           rows={5}
+          autoComplete="off"
+          spellCheck={false}
           value={paste}
           onChange={(e) => setPaste(e.target.value)}
           placeholder={"Base URL: http://127.0.0.1:65396\nMessages URL: …\nModels URL: …\nAPI Key: …\nModel: …"}
@@ -284,6 +327,7 @@ export function SettingsPage({ embedded = false }: { embedded?: boolean }) {
             ))}
           </ul>
         ) : null}
+        {pasteMessage && <p className="settings-message" role="status">{pasteMessage}</p>}
         <button type="button" className="settings-btn" data-testid="settings-parse" onClick={handleParse} disabled={paste.trim().length === 0}>
           解析并填入
         </button>
@@ -336,18 +380,20 @@ export function SettingsPage({ embedded = false }: { embedded?: boolean }) {
       <section className="settings-section" aria-label="测试与保存">
         <h2 className="settings-section-title">测试与保存</h2>
         <div className="settings-actions">
-          <button type="button" className="settings-btn" data-testid="settings-test" disabled={testing} onClick={() => void handleTest()}>
+          <button type="button" className="settings-btn" data-testid="settings-test" disabled={working} onClick={() => void handleTest()}>
             {testing ? "测试中…" : "测试连接（模型列表 + 真实推理）"}
           </button>
-          <button type="button" className="settings-btn is-primary" data-testid="settings-save" disabled={!proofValid || saving} onClick={() => void handleSave()}>
+          <button type="button" className="settings-btn is-primary" data-testid="settings-save" disabled={!proofValid || working} onClick={() => void handleSave()}>
             {saving ? "保存中…" : "保存并启用"}
           </button>
           {meta?.enabled ? (
-            <button type="button" className="settings-btn is-danger" data-testid="settings-disconnect" disabled={disconnecting} onClick={() => void handleDisconnect()}>
+            <button type="button" className="settings-btn is-danger" data-testid="settings-disconnect" disabled={working} onClick={() => void handleDisconnect()}>
               {disconnecting ? "断开中…" : "断开并禁用"}
             </button>
           ) : null}
         </div>
+        <p className="settings-hint">测试会向所填服务发送一次简短请求，可能消耗少量额度。两项测试通过后才可保存启用；修改配置后需要重新测试。</p>
+        {testing && <p className="settings-message" role="status">正在读取模型列表并验证真实推理，请稍候…</p>}
         {testResult ? (
           <ul className="settings-stages" data-testid="settings-stages">
             <li className={"settings-stage " + (testResult.models.ok ? "is-ok" : "is-fail")}>

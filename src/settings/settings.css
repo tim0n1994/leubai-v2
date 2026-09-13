@@ -103,7 +103,8 @@
 }
 
 .settings-btn {
-  height: 36px;
+  min-height: 44px;
+  height: auto;
   padding: 0 16px;
   border-radius: 8px;
   border: 1px solid var(--divider);
@@ -128,7 +129,7 @@
 .settings-btn.is-primary {
   background: var(--graphite);
   border-color: var(--graphite);
-  color: #ffffff;
+  color: var(--surface);
 }
 
 .settings-btn.is-danger {
@@ -178,6 +179,7 @@
   justify-content: space-between;
   gap: 12px;
   font-size: 13px;
+  overflow-wrap: anywhere;
   padding: 8px 10px;
   border: 1px solid var(--divider);
   border-radius: 8px;

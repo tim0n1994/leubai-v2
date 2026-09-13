@@ -3,8 +3,10 @@ import type { DomainStore, StoreCommitOutcome } from "../domain/store.ts";
 import type { DataMode, DomainState } from "../domain/types.ts";
 import { getBrowserLocalStorage, getBrowserWebLocks } from "./storage.ts";
 import type { LockManagerLike, StorageLike } from "./storage.ts";
-import { openDomainPersistence } from "./persistence.ts";
+import { openDomainPersistence, openWorkspacePersistence } from "./persistence.ts";
 import type { DomainPersistence } from "./persistence.ts";
+import { readBrowserWorkspaceRecovery } from "./browserWorkspaceRecovery.ts";
+import type { BrowserWorkspaceRecovery } from "./browserWorkspaceRecovery.ts";
 
 export type PersistedDomainHandle =
   | {
@@ -12,12 +14,14 @@ export type PersistedDomainHandle =
       dataMode: DataMode;
       store: DomainStore;
       persistence: DomainPersistence;
+      browserRecovery?: BrowserWorkspaceRecovery | null;
     }
   | {
       status: "migrationFailed" | "corrupt" | "namespaceMismatch" | "readFailed" | "seedFailed" | "unavailable";
       dataMode: DataMode;
       reason: string;
       rawPayload: string | null;
+      browserRecovery?: BrowserWorkspaceRecovery | null;
     };
 
 export interface CreatePersistedDomainStoreOptions {
@@ -28,6 +32,8 @@ export interface CreatePersistedDomainStoreOptions {
   requireCrossTabLock?: boolean;
   now?: () => string;
   uuid?: () => string;
+  fetch?: typeof fetch;
+  currentOwner?: () => string | null;
 }
 
 const NO_BROWSER_STORAGE = "STORAGE_UNAVAILABLE: no persistent browser storage";
@@ -36,12 +42,14 @@ export async function createPersistedDomainStore(
   options: CreatePersistedDomainStoreOptions,
 ): Promise<PersistedDomainHandle> {
   const storageIsImplicit = options.storage === undefined;
-  const storage = options.storage ?? getBrowserLocalStorage();
-  if (!storage) {
+  const remote = options.dataMode === "live" && storageIsImplicit;
+  const storage = options.storage ?? (remote ? null : getBrowserLocalStorage());
+  const browserRecovery = remote ? readBrowserWorkspaceRecovery(options.owner ?? "guest") : null;
+  if (!remote && !storage) {
     return { status: "unavailable", dataMode: options.dataMode, reason: NO_BROWSER_STORAGE, rawPayload: null };
   }
   const locks = options.locks ?? getBrowserWebLocks();
-  if (!locks && (options.requireCrossTabLock || storageIsImplicit)) {
+  if (!remote && !locks && (options.requireCrossTabLock || storageIsImplicit)) {
     return {
       status: "unavailable",
       dataMode: options.dataMode,
@@ -49,7 +57,9 @@ export async function createPersistedDomainStore(
       rawPayload: null,
     };
   }
-  const { persistence } = await openDomainPersistence({ dataMode: options.dataMode, owner: options.owner, storage, locks });
+  const { persistence } = remote
+    ? await openWorkspacePersistence({ owner: options.owner ?? "guest", fetch: options.fetch, currentOwner: options.currentOwner })
+    : await openDomainPersistence({ dataMode: options.dataMode, owner: options.owner, storage: storage!, locks });
   if (persistence.openStatus !== "ready") {
     // Data is preserved on disk; callers get the raw payload for recovery. Nothing is cleared.
     return {
@@ -57,6 +67,7 @@ export async function createPersistedDomainStore(
       dataMode: options.dataMode,
       reason: persistence.openReason ?? "unreadable storage",
       rawPayload: persistence.rawPayload,
+      browserRecovery,
     };
   }
   const commit = async (expected: number, next: DomainState): Promise<StoreCommitOutcome> => {
@@ -74,7 +85,7 @@ export async function createPersistedDomainStore(
     const verified = persistence.getState();
     if (verified !== null) store.adoptExternalState(verified);
   });
-  return { status: "ready", dataMode: options.dataMode, store, persistence };
+  return { status: "ready", dataMode: options.dataMode, store, persistence, browserRecovery };
 }
 
 /** Reset is fixture-only by construction; live data is never cleared. */
