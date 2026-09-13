@@ -3,9 +3,17 @@ import { spawn } from "node:child_process";
 import { randomBytes } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { isLoopbackHostname } from "../server/urlguard.mjs";
 
 if (process.env.LEUBAI_AUTH_DISABLED === "1") {
   throw new Error("Authentication cannot be disabled in the public container.");
+}
+const publicOrigin = process.env.LEUBAI_PUBLIC_ORIGIN || "";
+const publicUrl = new URL(publicOrigin);
+if (publicUrl.origin !== publicOrigin || publicUrl.protocol !== "https:" ||
+    publicUrl.username || publicUrl.password || isLoopbackHostname(publicUrl.hostname) ||
+    !/^[a-z0-9.-]+(?::[0-9]+)?$/i.test(publicUrl.host)) {
+  throw new Error("LEUBAI_PUBLIC_ORIGIN must be an exact public HTTPS origin.");
 }
 const dataDir = process.env.LEUBAI_DATA_DIR || "/app/.leubai-local";
 await mkdir(dataDir, { recursive: true, mode: 0o700 });
@@ -14,6 +22,7 @@ const env = {
   NODE_ENV: "production",
   LEUBAI_HOST: "127.0.0.1",
   LEUBAI_PORT: "5200",
+  LEUBAI_TRUST_CLOUDFLARE: "0",
   LEUBAI_AUTH_DB: process.env.LEUBAI_AUTH_DB || join(dataDir, "auth.sqlite"),
   LEUBAI_SETTINGS_FILE: process.env.LEUBAI_SETTINGS_FILE || join(dataDir, "llm-settings.json"),
 };
@@ -26,12 +35,16 @@ if (!env.LEUBAI_AUTH_SECRET && !env.JWT_SECRET) {
   }
   env.LEUBAI_AUTH_SECRET = await readFile(secretFile, "utf8");
 }
-if (!env.LEUBAI_PUBLIC_ORIGIN) {
-  console.warn("[leubai] Set LEUBAI_PUBLIC_ORIGIN to the exact HTTPS application origin; public API requests stay blocked until configured.");
-}
+// ModelScope's gateway uses an internal Host. This dedicated container routes
+// to one operator-configured authority, never a client-supplied forwarded host.
+// Origin, client identification and session cookies remain untouched.
+const nginxConfig = (await readFile(new URL("./modelscope-nginx.conf", import.meta.url), "utf8"))
+  .replace("__LEUBAI_PUBLIC_HOST__", publicUrl.host);
+const nginxConfigPath = "/tmp/leubai-nginx/runtime.conf";
+await writeFile(nginxConfigPath, nginxConfig, { mode: 0o600 });
 const children = [
   spawn(process.execPath, ["server/start.mjs"], { env, stdio: "inherit" }),
-  spawn("nginx", ["-c", "/app/deploy/modelscope-nginx.conf", "-g", "daemon off;"], { stdio: "inherit" }),
+  spawn("nginx", ["-c", nginxConfigPath, "-g", "daemon off;"], { stdio: "inherit" }),
 ];
 let stopping = false;
 function shutdown(code) {
