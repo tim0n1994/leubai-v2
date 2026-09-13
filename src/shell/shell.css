@@ -337,4 +337,24 @@
     border-radius: 0;
     box-shadow: none;
   }
+
+  .shell-topbar {
+    gap: 12px;
+  }
+
+  .shell-topbar-end {
+    gap: 12px;
+    min-width: 0;
+  }
+
+  .shell-date {
+    display: none;
+  }
+
+  .shell-badge {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
 }

@@ -9,6 +9,7 @@ import { extname, join, resolve, sep } from "node:path";
 import { isLoopbackHostname, validateCandidate } from "./urlguard.mjs";
 import { loadSettings, saveSettings } from "./settingsStore.mjs";
 import { fetchModelList, runLlmInference } from "./upstream.mjs";
+import { WorkspaceError } from "./workspaceStore.mjs";
 
 const CLIENT_HEADER = "x-leubai-client";
 const CLIENT_VALUE = "leubai-settings/1";
@@ -430,7 +431,7 @@ export function createAppServer({
           return;
         }
         try {
-          const raw = await readBody(req, maxBodyBytes);
+          const raw = await readBody(req, url === "/api/workspace" ? Math.max(maxBodyBytes, 2 * 1024 * 1024 + 1024) : maxBodyBytes);
           body = raw.length ? JSON.parse(raw) : {};
         } catch (err) {
           if (err && err.code === "too_large") {
@@ -473,6 +474,43 @@ export function createAppServer({
         }
         if (await auth.handle(req, res, body)) return;
         sendJson(res, 404, { error: "not_found" });
+        return;
+      }
+      if (url === "/api/workspace" || /^\/api\/resources\/(intents|commitments|protectedBlocks)$/.test(url)) {
+        if (!auth) {
+          sendJson(res, 403, { error: "auth_disabled" });
+          return;
+        }
+        try {
+          const user = await auth.authenticate(req);
+          const requestedOwner = req.headers["x-leubai-workspace-owner"];
+          if (typeof requestedOwner === "string" && requestedOwner !== user.id) {
+            sendJson(res, 403, { error: "WORKSPACE_OWNER_MISMATCH" });
+            return;
+          }
+          if (!auth.workspace) {
+            sendJson(res, 503, { error: "workspace_unavailable" });
+            return;
+          }
+          if (url !== "/api/workspace") {
+            if (method !== "GET") { sendJson(res, 405, { error: "method_not_allowed" }); return; }
+            const workspace = auth.workspace.read(user.id);
+            const collection = url.split("/").at(-1);
+            sendJson(res, 200, { ownerId: user.id, revision: workspace.revision, items: Object.values(workspace.state?.[collection] ?? {}) });
+          } else if (method === "GET") {
+            sendJson(res, 200, { ownerId: user.id, ...auth.workspace.read(user.id) });
+          } else if (method === "PUT") {
+            if (!body || typeof body !== "object" || Array.isArray(body) || Object.keys(body).some((key) => !["state", "expectedRevision"].includes(key))) {
+              sendJson(res, 400, { error: "INVALID_WORKSPACE" });
+              return;
+            }
+            sendJson(res, 200, { ownerId: user.id, ...auth.workspace.save(user.id, body) });
+          } else sendJson(res, 405, { error: "method_not_allowed" });
+        } catch (err) {
+          if (err instanceof WorkspaceError || (typeof err?.status === "number" && typeof err?.code === "string")) {
+            sendJson(res, err.status, { error: err.code, detail: { code: err.code, message: err.message }, ...(err.revision !== undefined ? { revision: err.revision } : {}) });
+          } else throw err;
+        }
         return;
       }
       if (auth) {

@@ -45,8 +45,6 @@ if (process.env.LEUBAI_AUTH_DISABLED === "1") {
     auth = createAuthService({
       databaseFile: process.env.LEUBAI_AUTH_DB || join(root, ".leubai-local", "auth.sqlite"),
       config,
-      // Business resources currently live in the browser, not on this server.
-      resourceHooks: { countUserResources: async () => 0, onUserDeleted: async () => {} },
     });
     publicOrigin = config.publicOrigin;
   } catch (err) {

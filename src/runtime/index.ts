@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createPersistedDomainStore } from "../data/index.ts";
-import { getAuthDataOwner } from "../auth/auth-session.ts";
+import { getAuthDataOwner, getBrowserAuthController } from "../auth/auth-session.ts";
 import type { DataMode } from "../domain/types.ts";
 
 export type DomainRuntimeHandle = Awaited<ReturnType<typeof createPersistedDomainStore>>;
@@ -17,11 +17,33 @@ function runtimeKey(dataMode: DataMode): string {
   return dataMode + "::" + getAuthDataOwner();
 }
 
-export function getDomainRuntime(dataMode: DataMode = "fixture"): Promise<DomainRuntimeHandle> {
+export function getDefaultDataMode(): DataMode {
+  return getAuthDataOwner() === "guest" ? "fixture" : "live";
+}
+
+export function getDomainRuntime(dataMode: DataMode = getDefaultDataMode()): Promise<DomainRuntimeHandle> {
   const key = runtimeKey(dataMode);
   const cached = runtimeCache.get(key);
   if (cached) return cached;
-  const initializing = createPersistedDomainStore({ dataMode, owner: getAuthDataOwner() }).catch((err: unknown) => {
+  const initializing = createPersistedDomainStore({
+    dataMode,
+    owner: getAuthDataOwner(),
+    currentOwner: () => {
+      const auth = getBrowserAuthController().getSnapshot();
+      // A failed account mutation (for example a wrong password) can leave a
+      // valid authenticated user in place. Keep that owner usable; only an
+      // unresolved initial session or a confirmed anonymous error should block
+      // remote writes.
+      if (auth.loading) return null;
+      if (auth.user?.id) return auth.user.id;
+      return auth.error ? null : "guest";
+    },
+  }).then((handle) => {
+    if (handle.status === "ready" && handle.persistence.refresh && typeof window !== "undefined") {
+      window.addEventListener("focus", () => { void handle.persistence.refresh?.(); });
+    }
+    return handle;
+  }).catch((err: unknown) => {
     if (runtimeCache.get(key) === initializing) runtimeCache.delete(key);
     throw err;
   });
@@ -29,7 +51,7 @@ export function getDomainRuntime(dataMode: DataMode = "fixture"): Promise<Domain
   return initializing;
 }
 
-export function retryDomainRuntime(dataMode: DataMode = "fixture"): Promise<DomainRuntimeHandle> {
+export function retryDomainRuntime(dataMode: DataMode = getDefaultDataMode()): Promise<DomainRuntimeHandle> {
   const key = runtimeKey(dataMode);
   const cached = runtimeCache.get(key);
   if (!cached) return getDomainRuntime(dataMode);
@@ -47,7 +69,7 @@ export function retryDomainRuntime(dataMode: DataMode = "fixture"): Promise<Doma
   });
 }
 
-export function useDomainRuntime(dataMode: DataMode = "fixture"): DomainRuntimeState {
+export function useDomainRuntime(dataMode: DataMode = getDefaultDataMode()): DomainRuntimeState {
   const [state, setState] = useState<DomainRuntimeState>({ status: "loading", dataMode });
   if (state.dataMode !== dataMode) {
     setState({ status: "loading", dataMode });

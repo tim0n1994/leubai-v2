@@ -245,6 +245,73 @@ test("week groups actual stored dates inside the week and leaves other days expl
   assert.ok(!week.includes("2026-09-14"));
 });
 
+test("completed scheduled records remain present in week and month without contributing active effort", () => {
+  const state = createInitialState("live");
+  const item = extraCommitment("completed", SURFACE_DATE, 600, 660, 60, "flexible");
+  item.status = "done";
+  state.commitments = { [item.id]: item };
+  state.protectedBlocks = {};
+  const week = selectWeekSurface(state, weekDatesContaining(SURFACE_DATE));
+  const month = selectMonthSurface(state, SURFACE_DATE);
+  for (const days of [week.days, month.weeks.flat()]) {
+    const day = days.find(day => day.date === SURFACE_DATE)!;
+    assert.equal(day.hasStoredRecords, true);
+    assert.equal(day.commitmentCount, 0);
+    assert.equal(day.knownEffortMinutes, 0);
+    assert.equal(day.unknownEffortCount, 0);
+  }
+  assert.equal(week.daysWithoutRecords, 6);
+});
+
+test("undated records do not establish date coverage while date-only records cover their saved date", () => {
+  const state = createInitialState("live");
+  const item = extraCommitment("unscheduled", SURFACE_DATE, 600, 660, 60, "flexible");
+  item.schedule = null;
+  state.commitments = { [item.id]: item };
+  state.protectedBlocks = {};
+  assert.ok(selectWeekSurface(state, weekDatesContaining(SURFACE_DATE)).days.every(day => !day.hasStoredRecords));
+  assert.ok(selectMonthSurface(state, SURFACE_DATE).weeks.flat().every(day => !day.hasStoredRecords));
+  item.schedule = { date: SURFACE_DATE, startMinute: null, endMinute: null, timezone: "Asia/Shanghai" };
+  let week = selectWeekSurface(state, weekDatesContaining(SURFACE_DATE));
+  assert.equal(week.daysWithoutRecords, 6);
+  assert.equal(week.days.find(day => day.date === SURFACE_DATE)?.knownEffortMinutes, 60);
+  item.status = "done";
+  week = selectWeekSurface(state, weekDatesContaining(SURFACE_DATE));
+  assert.equal(week.daysWithoutRecords, 6);
+  assert.equal(week.days.find(day => day.date === SURFACE_DATE)?.knownEffortMinutes, 0);
+});
+
+test("all-day multi-date records retain local-date coverage and conserve effort", () => {
+  const state = createInitialState("live");
+  state.ruleset.timezone = "America/New_York";
+  const item = extraCommitment("all-day", "2026-09-11", 0, 0, 180, "flexible");
+  item.schedule = { date: "2026-09-11", endDate: "2026-09-13", startMinute: null, endMinute: null, timezone: "Asia/Shanghai", allDay: true };
+  state.commitments = { [item.id]: item };
+  state.protectedBlocks = {};
+  for (const days of [selectWeekSurface(state, weekDatesContaining(SURFACE_DATE)).days, selectMonthSurface(state, SURFACE_DATE).weeks.flat()]) {
+    assert.deepEqual(days.filter(day => day.hasStoredRecords).map(day => day.date), ["2026-09-11", "2026-09-12", "2026-09-13"]);
+    assert.equal(days.reduce((sum, day) => sum + day.knownEffortMinutes, 0), 180);
+  }
+  item.status = "done";
+  assert.equal(selectWeekSurface(state, weekDatesContaining(SURFACE_DATE)).daysWithoutRecords, 4);
+});
+
+test("cross-day records use display timezone and exclude a midnight end from coverage", () => {
+  const state = createInitialState("live");
+  state.ruleset.timezone = "UTC";
+  const item = extraCommitment("cross-day", "2026-09-12", 420, 480, 60, "flexible");
+  item.schedule!.endDate = "2026-09-13";
+  state.commitments = { [item.id]: item };
+  state.protectedBlocks = {};
+  for (const status of ["active", "done"] as const) {
+    item.status = status;
+    for (const days of [selectWeekSurface(state, weekDatesContaining(SURFACE_DATE)).days, selectMonthSurface(state, SURFACE_DATE).weeks.flat()]) {
+      assert.deepEqual(days.filter(day => day.hasStoredRecords).map(day => day.date), ["2026-09-11", "2026-09-12"]);
+      assert.equal(days.reduce((sum, day) => sum + day.knownEffortMinutes, 0), status === "active" ? 60 : 0);
+    }
+  }
+});
+
 test("protected overlap is derived from schedule times separately from the estimate gap", () => {
   const state = createInitialState("fixture");
   const hero = selectHeroView(state, SURFACE_DATE);

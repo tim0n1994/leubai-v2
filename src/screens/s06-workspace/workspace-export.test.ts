@@ -64,6 +64,7 @@ test("S06 exposes a selected-draft download action locked during unresolved writ
   assert.match(source, /data-workspace-export/);
   assert.match(source, /onClick=\{exportDraft\}/);
   assert.match(source, /disabled=\{busy !== null \|\| commandState\.busy \|\| commandState\.pending !== null\}/);
-  assert.match(source, /buildWorkspaceExport\(fresh\.envelope\.state, draft\.id, draft\.revision/);
+  assert.match(source, /const fresh = await readWorkspaceSavedState\(persistence\)/);
+  assert.match(source, /buildWorkspaceExport\(fresh, draft\.id, draft\.revision/);
   assert.match(source, /downloadWorkspaceExport\(result\.file\)/);
 });

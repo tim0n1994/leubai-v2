@@ -4,6 +4,21 @@
   gap: 28px;
 }
 
+.s02-navigation, .s02-editor-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.s02-navigation label { display: flex; gap: 8px; align-items: center; }
+.s02-navigation button, .s02-navigation input, .s02-editor button, .s02-editor input, .s02-editor select, .s02-agenda > button { padding: 9px 12px; border: 1px solid var(--divider); border-radius: 8px; color: var(--text); background: var(--surface); font: inherit; }
+.s02-editor { padding: 20px; border: 1px solid var(--divider); border-radius: 12px; }
+.s02-editor fieldset { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; border: 0; padding: 0; }
+.s02-editor label { display: flex; flex-direction: column; gap: 7px; font-size: 14px; }
+.s02-editor .s02-editor-check { flex-direction: row; align-items: center; grid-column: 1 / -1; }
+.s02-editor input, .s02-editor select { min-width: 0; }
+.s02-editor p { color: var(--text-2); font-size: 14px; }
+.s02-agenda { display: flex; flex-direction: column; gap: 10px; }
+.s02-agenda > button { text-align: left; }
+.s02-week-day-date, button.s02-month-cell-date { border: 0; background: transparent; color: inherit; text-align: left; cursor: pointer; }
+.s02-month-item { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+@media (max-width: 650px) { .s02-editor fieldset { grid-template-columns: minmax(0, 1fr); } .s02-navigation label { width: 100%; } }
+
 .s02-title {
   margin: 0;
   font-family: var(--font-serif);

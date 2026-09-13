@@ -170,6 +170,7 @@ const ERROR_TEXT: Record<string, string> = {
   invalid_json: "请求格式错误",
   request_failed: "本地服务请求失败",
   AUTH_REQUIRED: "请先登录后再管理模型连接",
+  ADMIN_REQUIRED: "模型连接由管理员管理，请联系管理员配置。你仍可调整外观。",
 };
 
 export function describeLlmError(code: string): string {

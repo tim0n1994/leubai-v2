@@ -75,6 +75,11 @@ test("login errors show detail.message and network errors use the quiet generic 
   await assert.rejects(createAuthClient(async () => { throw new TypeError("network"); }).me(), /暂时无法连接账号服务/);
 });
 
+test("cooldown errors retain the machine code for the resend UI", async () => {
+  const client = createAuthClient(async () => json({ error: "CODE_COOLDOWN", detail: { message: "验证码已发送，请稍后再试。" } }, 429));
+  await assert.rejects(client.sendCode(user.email, "register"), (error: unknown) => error instanceof AuthError && error.code === "CODE_COOLDOWN" && error.status === 429);
+});
+
 test("an older session restore cannot replace a completed login", async () => {
   let resolveMe: ((response: Response) => void) | undefined;
   const pendingMe = new Promise<Response>((resolve) => { resolveMe = resolve; });

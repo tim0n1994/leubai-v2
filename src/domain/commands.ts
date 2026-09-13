@@ -11,6 +11,7 @@ import { intentHandlers } from "./handlers/intent.ts";
 import { checkpointNoteHandlers } from "./handlers/checkpointNote.ts";
 import { protectedBlockHandlers } from "./handlers/protectedBlock.ts";
 import { attentionDueHandlers } from "./handlers/attentionDue.ts";
+import { localCommitmentHandlers } from "./handlers/localCommitment.ts";
 
 export const commandHandlers = {
   ...captureHandlers,
@@ -24,4 +25,5 @@ export const commandHandlers = {
   ...checkpointNoteHandlers,
   ...protectedBlockHandlers,
   ...attentionDueHandlers,
+  ...localCommitmentHandlers,
 } as Record<CommandType, Handler>;

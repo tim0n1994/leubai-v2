@@ -30,7 +30,6 @@ import {
 } from "../s08-blank/quietSurface.ts";
 import "./s18-m-blank.css";
 
-const DATA_MODE = "fixture" as const;
 const EXIT_TARGET = "/m/now";
 const OPEN_ID_PREFIX = "s18-openQuietSession-";
 const DECIDE_ID_PREFIX = "s18-decideQuiet-";
@@ -64,13 +63,13 @@ interface S18RuntimeProps {
 }
 
 function S18Runtime({ blockIdQuery, onRetrySettled, onClearBlockId }: S18RuntimeProps) {
-  const runtime = useDomainRuntime(DATA_MODE);
+  const runtime = useDomainRuntime();
   const [retrying, setRetrying] = useState(false);
 
   const retry = () => {
     if (retrying) return;
     setRetrying(true);
-    retryDomainRuntime(DATA_MODE)
+    retryDomainRuntime(runtime.dataMode)
       .catch(() => {
         setRetrying(false);
       })
