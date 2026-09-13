@@ -34,7 +34,6 @@ import { makeQuietIdeaCommand, saveQuietIdea, selectRecentQuietText } from "./qu
 import { quietMusicController, unconfiguredMusicAdapter } from "./music-adapter.ts";
 import type { QuietMusicAdapter } from "./music-adapter.ts";
 
-const DATA_MODE = "fixture" as const;
 const EXIT_TARGET = "/";
 const OPEN_ID_PREFIX = "s08-openQuietSession-";
 const DECIDE_ID_PREFIX = "s08-decideQuiet-";
@@ -70,13 +69,13 @@ interface BlankRuntimeProps {
 }
 
 function BlankRuntime({ blockIdQuery, onRetrySettled, onClearBlockId, musicAdapter }: BlankRuntimeProps) {
-  const runtime = useDomainRuntime(DATA_MODE);
+  const runtime = useDomainRuntime();
   const [retrying, setRetrying] = useState(false);
 
   const retry = () => {
     if (retrying) return;
     setRetrying(true);
-    retryDomainRuntime(DATA_MODE)
+    retryDomainRuntime(runtime.dataMode)
       .catch(() => {
         setRetrying(false);
       })

@@ -154,9 +154,144 @@ export interface DomainPersistence {
   readonly rawPayload: string | null;
   getState(): DomainState | null;
   readFreshState(): DomainState | null;
+  /** Remote workspaces refresh asynchronously; local persistence reads synchronously. */
+  refresh?(): Promise<CommitOutcome>;
   commit(expectedGlobalRevision: number, next: DomainState): Promise<CommitOutcome>;
   subscribeExternal(listener: () => void): () => void;
   resetFixtureOnly(): Promise<CommitOutcome>;
+}
+
+export interface OpenWorkspacePersistenceOptions {
+  owner: string;
+  fetch?: typeof fetch;
+  currentOwner?: () => string | null;
+}
+
+function createEmptyWorkspaceState(): DomainState {
+  const defaults = createInitialState("live");
+  const at = new Date().toISOString();
+  const state = { ...defaults, ledger: [], events: [], attention: {
+    items: {},
+    budget: { ...defaults.attention.budget, id: "live-attention-budget", createdAt: at, updatedAt: at, used: 0, deliveredIds: [], budgetDay: at.slice(0, 10), provenance: { origin: "system" as const } },
+  }, ruleset: { ...defaults.ruleset, id: "live-ruleset", createdAt: at, updatedAt: at, history: [], provenance: { origin: "system" as const } } };
+  for (const collection of ENTITY_COLLECTIONS) state[collection] = {};
+  return state;
+}
+
+/** Account workspaces use the server's revision for CAS, independently of domain revisions. */
+export async function openWorkspacePersistence(options: OpenWorkspacePersistenceOptions): Promise<{ persistence: DomainPersistence }> {
+  const fetchImpl = options.fetch ?? fetch;
+  let current: DomainState | null = null;
+  let revision = 0;
+  let openStatus: DomainPersistence["openStatus"] = "ready";
+  let openReason: string | null = null;
+  let pending: DomainState | null = null;
+  let queue: Promise<unknown> = Promise.resolve();
+  const listeners = new Set<() => void>();
+  const ownerMatches = () => Boolean(options.owner && options.owner !== "guest") &&
+    (!options.currentOwner || options.currentOwner() === options.owner);
+  const notify = () => { for (const listener of listeners) listener(); };
+  const unavailable = (reason: string): CommitOutcome => ({ ok: false, code: "STORAGE_UNAVAILABLE", reason, retryable: false });
+  type Workspace = { revision: number; state: DomainState | null };
+  type ResponseResult = { ok: true; workspace: Workspace } | { ok: false; outcome: CommitOutcome };
+
+  async function request(method: "GET" | "PUT", next?: DomainState): Promise<ResponseResult> {
+    if (!ownerMatches()) return { ok: false, outcome: unavailable("账号已变更，请重新打开工作区。") };
+    let response: Response;
+    try {
+      response = await fetchImpl("/api/workspace", {
+        method,
+        credentials: "same-origin",
+        signal: AbortSignal.timeout(15000),
+        headers: { "Content-Type": "application/json", "x-leubai-client": "leubai-settings/1", "x-leubai-workspace-owner": options.owner },
+        ...(method === "PUT" ? { body: JSON.stringify({ expectedRevision: revision, state: next }) } : {}),
+      });
+    } catch (error) {
+      return { ok: false, outcome: { ok: false, code: method === "PUT" ? "STORAGE_WRITE_FAILED" : "STORAGE_READ_FAILED", reason: errorText(error), retryable: true, ...(method === "PUT" ? { uncertain: true } : {}) } };
+    }
+    if (!ownerMatches()) return { ok: false, outcome: unavailable("账号已变更，请重新打开工作区。") };
+    if (response.status === 401 || response.status === 403) return { ok: false, outcome: unavailable("登录已失效或账号不匹配，请重新登录后读取工作区。") };
+    if (response.status === 409) return { ok: false, outcome: { ok: false, code: "REVISION_CONFLICT", reason: "工作区已在其他页面或设备更新，请检查最新内容后重试。", retryable: true } };
+    if (!response.ok) return { ok: false, outcome: { ok: false, code: method === "PUT" ? "STORAGE_WRITE_FAILED" : "STORAGE_READ_FAILED", reason: "工作区服务返回 HTTP " + response.status, retryable: response.status >= 500, ...(method === "PUT" && response.status >= 500 ? { uncertain: true } : {}) } };
+    try {
+      const body: unknown = await response.json();
+      if (!isRecord(body) || !Number.isSafeInteger(body.revision) || (body.revision as number) < 0 ||
+        (body.ownerId !== undefined && body.ownerId !== options.owner)) throw new Error("工作区返回无效的账号或版本。");
+      if (body.state === null && body.revision === 0) return { ok: true, workspace: { revision: 0, state: null } };
+      const parsed = parseEnvelope(JSON.stringify({ schemaVersion: isRecord(body.state) ? body.state.schemaVersion : null, dataMode: "live", state: body.state }), "live");
+      if (parsed.kind !== "ok" || body.revision === 0) throw new Error(parsed.kind === "ok" || parsed.kind === "empty" ? "工作区版本无效。" : parsed.reason);
+      return { ok: true, workspace: { revision: body.revision as number, state: parsed.envelope.state } };
+    } catch (error) {
+      return { ok: false, outcome: { ok: false, code: method === "PUT" ? "STORAGE_READBACK_UNVERIFIED" : "STORAGE_CORRUPT", reason: errorText(error), retryable: method === "PUT", ...(method === "PUT" ? { uncertain: true } : {}) } };
+    }
+  }
+
+  function adopt(workspace: Workspace) {
+    revision = workspace.revision;
+    current = workspace.state ?? current ?? createEmptyWorkspaceState();
+  }
+  function enqueue<T>(operation: () => Promise<T>): Promise<T> {
+    const run = queue.then(operation, operation);
+    queue = run.then(() => undefined, () => undefined);
+    return run;
+  }
+  const initial = await request("GET");
+  if (initial.ok) adopt(initial.workspace);
+  else {
+    openStatus = "readFailed";
+    openReason = initial.outcome.ok ? "工作区无法读取。" : initial.outcome.reason;
+  }
+  const persistence: DomainPersistence = {
+    dataMode: "live", openStatus, openReason, rawPayload: null,
+    getState: () => current,
+    readFreshState: () => ownerMatches() ? current : null,
+    refresh: () => enqueue(async () => {
+      const fresh = await request("GET");
+      if (!fresh.ok) return fresh.outcome;
+      // An unresolved write is acknowledged only by retrying its original candidate.
+      if (pending && JSON.stringify(fresh.workspace.state) === JSON.stringify(pending)) return { ok: true };
+      adopt(fresh.workspace);
+      notify();
+      return { ok: true };
+    }),
+    commit: (expectedGlobalRevision, next) => enqueue(async () => {
+      if (openStatus !== "ready") return unavailable(openReason ?? "工作区未打开。");
+      if (next.dataMode !== "live") return unavailable("演示数据不能写入账号工作区。");
+      const fresh = await request("GET");
+      if (!fresh.ok) return fresh.outcome;
+      if (pending === next && JSON.stringify(fresh.workspace.state) === JSON.stringify(next)) {
+        adopt(fresh.workspace);
+        pending = null;
+        return { ok: true };
+      }
+      const storedGlobalRevision = fresh.workspace.state?.globalRevision ?? current?.globalRevision ?? 1;
+      if (fresh.workspace.revision !== revision || storedGlobalRevision !== expectedGlobalRevision) {
+        adopt(fresh.workspace);
+        pending = null;
+        notify();
+        return { ok: false, code: "REVISION_CONFLICT", reason: "工作区已更新，请检查最新内容后重新提交。", retryable: true, storedGlobalRevision };
+      }
+      pending = next;
+      const saved = await request("PUT", next);
+      if (!saved.ok) {
+        if (!saved.outcome.ok && saved.outcome.code === "REVISION_CONFLICT") {
+          pending = null;
+          const latest = await request("GET");
+          if (latest.ok) { adopt(latest.workspace); notify(); }
+        } else if (!saved.outcome.ok && !saved.outcome.uncertain) pending = null;
+        return saved.outcome;
+      }
+      if (saved.workspace.revision !== revision + 1 || JSON.stringify(saved.workspace.state) !== JSON.stringify(next)) {
+        return { ok: false, code: "STORAGE_READBACK_UNVERIFIED", reason: "服务端返回内容未确认本次保存，请重试原操作。", retryable: true, uncertain: true };
+      }
+      adopt(saved.workspace);
+      pending = null;
+      return { ok: true };
+    }),
+    subscribeExternal: (listener) => { listeners.add(listener); return () => { listeners.delete(listener); }; },
+    resetFixtureOnly: async () => unavailable("真实工作区不能通过演示重置清除。"),
+  };
+  return { persistence };
 }
 
 export interface OpenDomainPersistenceOptions {

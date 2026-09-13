@@ -23,7 +23,7 @@ export function S04Plan() {
 }
 
 function S04RuntimeBody({ onRetrySettled }: { onRetrySettled: () => void }) {
-  const runtime = useDomainRuntime("fixture");
+  const runtime = useDomainRuntime();
   const [retrying, setRetrying] = useState(false);
   if (runtime.status === "loading") {
     return (

@@ -14,14 +14,17 @@ export interface AuthStatus {
   emailDelivery: "unavailable" | "console" | "email";
   registrationEnabled: boolean;
   passwordMinLength: number;
+  codeResendSeconds?: number;
 }
 
 export class AuthError extends Error {
   readonly status: number;
-  constructor(message: string, status = 0) {
+  readonly code: string | null;
+  constructor(message: string, status = 0, code: string | null = null) {
     super(message);
     this.name = "AuthError";
     this.status = status;
+    this.code = code;
   }
 }
 
@@ -49,7 +52,8 @@ export function createAuthClient(fetchImpl: typeof fetch = fetch) {
       const detail = result && typeof result === "object" && "detail" in result ? result.detail : null;
       const message = detail && typeof detail === "object" && "message" in detail && typeof detail.message === "string"
         ? detail.message : "账号操作未完成，请稍后重试。";
-      throw new AuthError(message, response.status);
+      const code = result && typeof result === "object" && "error" in result && typeof result.error === "string" ? result.error : null;
+      throw new AuthError(message, response.status, code);
     }
     return result as T;
   }

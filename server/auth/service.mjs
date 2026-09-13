@@ -5,6 +5,7 @@ import { DatabaseSync } from "node:sqlite";
 import { promisify } from "node:util";
 import { authRequestAllowed } from "./config.mjs";
 import { createEmailSender } from "./email.mjs";
+import { createWorkspaceStore } from "../workspaceStore.mjs";
 
 const derive = promisify(scrypt);
 const COOKIE = "leubai_session";
@@ -80,6 +81,7 @@ export function createAuthService({ databaseFile, config, sendEmail = createEmai
       key TEXT PRIMARY KEY, started_at INTEGER NOT NULL, count INTEGER NOT NULL
     );
   `);
+  const workspace = createWorkspaceStore(db, { now });
 
   const getUser = (id) => db.prepare("SELECT * FROM users WHERE id = ?").get(id);
   const userByEmail = (email) => db.prepare("SELECT * FROM users WHERE email = ?").get(email);
@@ -242,7 +244,7 @@ export function createAuthService({ databaseFile, config, sendEmail = createEmai
       if (!body || typeof body !== "object" || Array.isArray(body)) fail(400, "INVALID_BODY", "请求内容无效。");
       const method = req.method || "GET";
       let payload;
-      if (method === "GET" && url === "/api/auth/status") payload = { enabled: true, emailDelivery: config.transport === "disabled" ? "unavailable" : config.transport === "console" ? "console" : "email", registrationEnabled: config.transport !== "disabled", passwordMinLength: PASSWORD_MIN };
+      if (method === "GET" && url === "/api/auth/status") payload = { enabled: true, emailDelivery: config.transport === "disabled" ? "unavailable" : config.transport === "console" ? "console" : "email", registrationEnabled: config.transport !== "disabled", passwordMinLength: PASSWORD_MIN, codeResendSeconds: config.codeResendSeconds };
       else if (method === "POST" && url === "/api/auth/send-code") payload = await sendCode(body, req);
       else if (method === "POST" && url === "/api/auth/register") payload = await register(body, req, res);
       else if (method === "POST" && url === "/api/auth/login") payload = await login(body, req, res);
@@ -276,7 +278,7 @@ export function createAuthService({ databaseFile, config, sendEmail = createEmai
           const limit = Number(new URL(req.url, "http://localhost").searchParams.get("limit") || 100);
           if (!Number.isInteger(limit) || limit < 1 || limit > 500) fail(400, "INVALID_LIMIT", "用户数量上限无效。");
           const rows = db.prepare("SELECT * FROM users ORDER BY created_at DESC, id LIMIT ?").all(limit);
-          payload = { users: await Promise.all(rows.map(async (row) => ({ ...publicUser(row), resourceCount: await resourceHooks.countUserResources?.(row.id) ?? 0 }))) };
+          payload = { users: await Promise.all(rows.map(async (row) => ({ ...publicUser(row), resourceCount: workspace.count(row.id) + (await resourceHooks.countUserResources?.(row.id) ?? 0) }))) };
         } else if (match && ["PATCH", "DELETE"].includes(method)) {
           const target = getUser(match[1]);
           if (!target) fail(404, "USER_NOT_FOUND", "账号不存在。");
@@ -305,5 +307,5 @@ export function createAuthService({ databaseFile, config, sendEmail = createEmai
     }
     return true;
   }
-  return { handle, authenticate, requireAdmin, close: () => db.close() };
+  return { handle, authenticate, requireAdmin, workspace, close: () => db.close() };
 }

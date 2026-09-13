@@ -5,7 +5,6 @@ import { defaultUuid } from "../../domain/ids.ts";
 import type { DomainStore } from "../../domain/store.ts";
 import type {
   Checkpoint,
-  DataMode,
   DomainState,
   Draft,
   EntityId,
@@ -215,7 +214,6 @@ export function SessionScreen() {
       </header>
       <SessionRuntime
         key={runtimeEpoch}
-        dataMode="fixture"
         query={query}
         onRetrySettled={() => setRuntimeEpoch((epoch) => epoch + 1)}
       />
@@ -224,19 +222,18 @@ export function SessionScreen() {
 }
 
 interface SessionRuntimeProps {
-  dataMode: DataMode;
   query: SessionQuery;
   onRetrySettled: () => void;
 }
 
-function SessionRuntime({ dataMode, query, onRetrySettled }: SessionRuntimeProps) {
-  const runtime = useDomainRuntime(dataMode);
+function SessionRuntime({ query, onRetrySettled }: SessionRuntimeProps) {
+  const runtime = useDomainRuntime();
   const [retrying, setRetrying] = useState(false);
 
   const retry = () => {
     if (retrying) return;
     setRetrying(true);
-    retryDomainRuntime(dataMode)
+    retryDomainRuntime(runtime.dataMode)
       .catch(() => {
         setRetrying(false);
       })
@@ -328,7 +325,7 @@ function SessionCheckpointPicker({ domain }: { domain: DomainState }) {
         <div className="s07-ring"><QuietArtwork /></div>
         <div className="s07-checkpoint-foot">
           <p className="s07-serif-md">共 {checkpoints.length} 个检查点</p>
-          <p className="s07-note">本地示例数据（fixture）；恢复检查点不会发送任何内容。</p>
+          <p className="s07-note">{domain.dataMode === "fixture" ? "本地示例数据（fixture）" : "当前账户数据"}；恢复检查点不会发送任何内容。</p>
         </div>
       </section>
       <section className="s07-restore" aria-label="已保存的检查点" data-checkpoint-list={checkpoints.length === 0 ? "empty" : "ready"}>
@@ -465,7 +462,7 @@ function SessionCheckpoint({ store, checkpoint, domain }: SessionCheckpointProps
             {checkpoint.nextStep ? checkpoint.nextStep : "此检查点没有记录下一步。"}
           </p>
           <p className="s07-note">
-            保存于 {formatStamp(checkpoint.savedAt)} · 本地示例数据（fixture）；恢复检查点不会发送任何内容。
+            保存于 {formatStamp(checkpoint.savedAt)} · {domain.dataMode === "fixture" ? "本地示例数据（fixture）" : "当前账户数据"}；恢复检查点不会发送任何内容。
           </p>
         </div>
       </section>

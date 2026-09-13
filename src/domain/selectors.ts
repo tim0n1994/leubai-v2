@@ -1,4 +1,5 @@
 import type { DomainState, EntityId } from "./types.ts";
+import { scheduleSlice, scheduledEffortOnDate } from "./calendarTime.ts";
 
 export interface CapacitySummary {
   date: string;
@@ -15,9 +16,9 @@ export function selectCapacitySummary(state: DomainState, date: string): Capacit
   let unknownEffortCount = 0;
   for (const c of Object.values(state.commitments)) {
     if (c.status !== "active") continue;
-    if (!c.schedule || c.schedule.date !== date) continue;
+    if (!c.schedule || (!scheduleSlice(c.schedule, date, state.ruleset.timezone) && !(c.schedule.startMinute === null && !c.schedule.allDay && c.schedule.date === date))) continue;
     if (c.effortEstimateMinutes === null) unknownEffortCount += 1;
-    else committedKnownMinutes += c.effortEstimateMinutes;
+    else committedKnownMinutes += scheduledEffortOnDate(c.schedule, c.effortEstimateMinutes, date, state.ruleset.timezone);
   }
   const incomplete = unknownEffortCount > 0;
   return {

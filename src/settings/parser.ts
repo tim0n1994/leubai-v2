@@ -61,9 +61,9 @@ function cleanValue(raw: string): string {
 }
 
 function fieldForLabel(rawLabel: string): Field | null {
-  const label = normalizeLabel(rawLabel);
+  const label = normalizeLabel(rawLabel).replace(/^export\s+/, "").replace(/[_-]/g, " ");
   if (!label) return null;
-  return ALIASES[label] ?? null;
+  return ALIASES[label] ?? ({ baseurl: "baseUrl", messagesurl: "messagesUrl", modelsurl: "modelsUrl", apikey: "apiKey", "openai base url": "baseUrl", "openai api key": "apiKey", "anthropic base url": "baseUrl", "anthropic api key": "apiKey", "chat completions url": "messagesUrl" } as Record<string, Field>)[label] ?? null;
 }
 
 type Candidate = { field: Field; value: string };
@@ -75,10 +75,12 @@ function extractCandidates(text: string): { candidates: Candidate[]; sawContent:
   for (const line of lines) {
     if (line.trim()) sawContent = true;
     const links = [...line.matchAll(MARKDOWN_LINK)];
-    const labelMatch = line.match(/^[\s>*-]*([^:：]{1,40})[:：]\s*(.*)$/);
+    const labelMatch = line.match(/^[\s>*-]*([^:：=]{1,40})[:：=]\s*(.*)$/);
     if (labelMatch) {
       const field = fieldForLabel(labelMatch[1]);
       if (field) {
+        if (/^(?:export\s+)?openai[_ -]/i.test(labelMatch[1].trim())) candidates.push({ field: "protocol", value: "openai" });
+        if (/^(?:export\s+)?anthropic[_ -]/i.test(labelMatch[1].trim())) candidates.push({ field: "protocol", value: "anthropic" });
         const rest = labelMatch[2];
         if (links.length > 0) {
           if (links.length > 1) {
@@ -104,7 +106,23 @@ function extractCandidates(text: string): { candidates: Candidate[]; sawContent:
 
 export function parseLlmSettingsText(text: string): ParsedLlmSettings {
   const errors: string[] = [];
-  const { candidates, sawContent } = extractCandidates(String(text ?? ""));
+  const source = String(text ?? "").trim().replace(/^```(?:json|env|text)?\s*\n/i, "").replace(/\n```$/, "").trim();
+  let extracted = extractCandidates(source);
+  if (source.startsWith("{")) {
+    try {
+      const record: unknown = JSON.parse(source);
+      if (!record || typeof record !== "object" || Array.isArray(record)) throw new Error();
+      const candidates: Candidate[] = [];
+      for (const [label, value] of Object.entries(record)) {
+        const field = fieldForLabel(label);
+        if (!field) continue;
+        if (typeof value !== "string") errors.push(FIELD_LABELS[field] + " 必须是文本");
+        else candidates.push({ field, value: cleanValue(value) });
+      }
+      extracted = { candidates, sawContent: true };
+    } catch { return { errors: ["JSON 配置格式不完整，请检查括号、引号和逗号"] }; }
+  }
+  const { candidates, sawContent } = extracted;
   const perField = new Map<Field, string[]>();
   for (const candidate of candidates) {
     const list = perField.get(candidate.field) ?? [];
@@ -147,4 +165,15 @@ export function parseLlmSettingsText(text: string): ParsedLlmSettings {
     }
   }
   return result;
+}
+
+export function suggestLlmEndpoints(baseUrl: string, protocol: "anthropic" | "openai") {
+  try {
+    const url = new URL(baseUrl.trim());
+    if (!["https:", "http:"].includes(url.protocol) || url.search || url.hash || url.username || url.password) return null;
+    let path = url.pathname.replace(/\/$/, "");
+    path = path.replace(/\/(?:messages|chat\/completions|models)$/, "");
+    if (!path) path = "/v1";
+    return { messagesUrl: url.origin + path + (protocol === "openai" ? "/chat/completions" : "/messages"), modelsUrl: url.origin + path + "/models" };
+  } catch { return null; }
 }

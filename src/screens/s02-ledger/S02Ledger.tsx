@@ -22,6 +22,7 @@ import {
   formatMinuteOfDay,
   formatSourceSyncText,
   selectCapacityView,
+  selectCommitmentsOnDate,
   selectMonthSurface,
   selectSourceRows,
   selectTimelineSurface,
@@ -31,6 +32,9 @@ import {
 import type { DomainStore, EntityId } from "../../domain/index.ts";
 import { retryDomainRuntime, useDomainRuntime } from "../../runtime/index.ts";
 import { resolveLedgerContext } from "./ledger-context.ts";
+import { CommitmentEditor } from "./CommitmentEditor.tsx";
+import { navigateCalendarPeriod } from "./calendarNavigation.ts";
+import { validCalendarDate, zonedParts } from "../../domain/calendarTime.ts";
 
 const COMMITMENT_STATUS_LABELS: Record<CommitmentView["status"], string> = {
   active: "已生效",
@@ -68,7 +72,7 @@ export function S02Ledger() {
 }
 
 function S02RuntimeGate({ onRetrySettled }: { onRetrySettled: () => void }) {
-  const runtime = useDomainRuntime("fixture");
+  const runtime = useDomainRuntime();
   const [retrying, setRetrying] = useState(false);
   if (runtime.status === "loading") {
     return (
@@ -115,6 +119,9 @@ function S02Ready({ store }: { store: DomainStore }) {
   const location = useLocation();
   const state = useDomainState(store);
   const [view, setView] = useState<"today" | "week" | "month">("today");
+  const [chosenDate, setChosenDate] = useState<string | null>(null);
+  const [editing, setEditing] = useState<string | null | undefined>(undefined);
+  const [showHistory, setShowHistory] = useState(false);
   const [selectedCommitmentId, setSelectedCommitmentId] =
     useState<EntityId | null>(null);
   const context = resolveLedgerContext(state, new URLSearchParams(location.search));
@@ -125,18 +132,21 @@ function S02Ready({ store }: { store: DomainStore }) {
       <Link className="s02-empty-action" to="/ledger">查看当前账本</Link>
     </div>
   );
-  const date = context.date;
+  const date = chosenDate ?? context.date;
   const capacity = selectCapacityView(state, date);
   const surface = selectTimelineSurface(state, date, {
     ...DAY_TRACK_GEOMETRY,
+    axisStartMinute: 0,
+    axisEndMinute: 1440,
     trackHeightPx: 630,
   });
   const week = selectWeekSurface(state, weekDatesContaining(date));
   const month = view === "month" ? selectMonthSurface(state, date) : null;
   const sources = selectSourceRows(state);
+  const dayRecords = selectCommitmentsOnDate(state, date);
   const timezone = state.ruleset.timezone;
   const selectedDetail =
-    [...surface.blocks, ...surface.unscheduled].find(
+    [...dayRecords, ...surface.unscheduled].find(
       (item) => item.id === selectedCommitmentId,
     ) ?? null;
   const visibleLanes = surface.protectedLanes.filter((lane) => lane.visible);
@@ -150,10 +160,15 @@ function S02Ready({ store }: { store: DomainStore }) {
   const hourCount = surface.hourLabels.length;
   const hourPercent = (index: number) =>
     (index / (hourCount - 1)) * 100 + "%";
+  const chooseDate = (next: string) => {
+    if (!validCalendarDate(next)) return;
+    setChosenDate(next);
+    setSelectedCommitmentId(null);
+  };
   return (
     <div className="s02-grid" data-ledger-date={date} data-ledger-intent={context.intent?.id} data-ledger-block={context.block?.blockId}>
       <article className="s02-board" aria-label={formatIsoDateCn(date) + " 时间安排"}>
-        {context.block && context.intent && (
+        {context.block && context.intent && date === context.date && (
           <section className="s02-focused-context" aria-label="从此刻定位的保护时段" data-ledger-context="matched">
             <p className="s02-blank-title"><Lock size={14} aria-hidden="true" />已定位：同一段受保护的留白</p>
             <p className="s02-blank-time">{formatIsoDateCn(date)} · {formatIsoTime(context.block.range.start)}—{formatIsoTime(context.block.range.end)}</p>
@@ -172,7 +187,7 @@ function S02Ready({ store }: { store: DomainStore }) {
               className={view === "today" ? "is-on" : ""}
               onClick={() => setView("today")}
             >
-              {context.block ? "当日" : "今日"}
+              日
             </button>
             <button
               type="button"
@@ -180,7 +195,7 @@ function S02Ready({ store }: { store: DomainStore }) {
               className={view === "week" ? "is-on" : ""}
               onClick={() => setView("week")}
             >
-              本周
+              周
             </button>
             <button
               type="button"
@@ -188,7 +203,7 @@ function S02Ready({ store }: { store: DomainStore }) {
               className={view === "month" ? "is-on" : ""}
               onClick={() => setView("month")}
             >
-              本月
+              月
             </button>
           </div>
           <span className="s02-tz">
@@ -196,6 +211,24 @@ function S02Ready({ store }: { store: DomainStore }) {
             当前时区 · {timezone}
           </span>
         </div>
+
+        <div className="s02-navigation" role="group" aria-label="日期导航">
+          <button type="button" onClick={() => chooseDate(navigateCalendarPeriod(date, view, -1))}>上一{view === "month" ? "月" : view === "week" ? "周" : "天"}</button>
+          <button type="button" onClick={() => chooseDate(zonedParts(Date.now(), timezone).date)}>今天</button>
+          <button type="button" onClick={() => chooseDate(navigateCalendarPeriod(date, view, 1))}>下一{view === "month" ? "月" : view === "week" ? "周" : "天"}</button>
+          <label>指定日期<input type="date" value={date} onChange={event => chooseDate(event.target.value)} /></label>
+          <button type="button" onClick={() => setEditing(null)}>新增责任与安排</button>
+        </div>
+        {editing !== undefined && <CommitmentEditor key={editing ?? "new"} store={store} commitment={editing ? state.commitments[editing] : null} date={date} onClose={() => setEditing(undefined)} />}
+        {view === "today" && <section className="s02-agenda" aria-label="当日完整安排清单">
+          <h3>当日安排 · {dayRecords.length} 项</h3>
+          {dayRecords.map(item => <button type="button" key={item.id} onClick={() => selectCommitment(item.id)}>{item.schedule?.startMinute === null ? "未定时间" : formatMinuteOfDay(item.schedule?.startMinute ?? 0) + "–" + formatMinuteOfDay(item.schedule?.endMinute ?? 0)} · {item.scope ?? "未命名责任"}</button>)}
+          {selectedDetail && <><S02CommitmentDetail commitment={selectedDetail} onClose={() => setSelectedCommitmentId(null)} /><button type="button" onClick={() => setEditing(selectedDetail.id)}>编辑此责任与安排</button></>}
+        </section>}
+        <details className="s02-agenda" open={showHistory} onToggle={event => setShowHistory(event.currentTarget.open)}>
+          <summary>未安排、待处理与已完成记录</summary>
+          {Object.values(state.commitments).filter(item => !item.schedule || item.schedule.startMinute === null && !item.schedule.allDay || item.status !== "active").map(item => <button type="button" key={item.id} onClick={() => setEditing(item.id)}>{item.scope ?? "未命名责任"} · {COMMITMENT_STATUS_LABELS[item.status]}</button>)}
+        </details>
 
         {view === "today" ? (
           boardIsEmpty ? (
@@ -423,12 +456,6 @@ function S02Ready({ store }: { store: DomainStore }) {
               <p className="s02-board-note">
                 需要改变完成路径，或由你重新决定可变事项。
               </p>
-              {selectedDetail ? (
-                <S02CommitmentDetail
-                  commitment={selectedDetail}
-                  onClose={() => setSelectedCommitmentId(null)}
-                />
-              ) : null}
             </div>
           )
         ) : view === "week" ? (
@@ -443,14 +470,16 @@ function S02Ready({ store }: { store: DomainStore }) {
                   data-week-date={day.date}
                   data-has-records={day.hasStoredRecords ? "true" : "false"}
                 >
-                  <span className="s02-week-day-date" aria-current={context.block && day.date === date ? "date" : undefined}>
+                  <button type="button" onClick={() => { chooseDate(day.date); setView("today"); }} className="s02-week-day-date" aria-current={day.date === date ? "date" : undefined}>
                     {day.weekdayLabel} {formatIsoDateCn(day.date)}
                     {context.block && day.date === date ? " · 已定位日期" : ""}
-                  </span>
+                  </button>
                   <span className="s02-week-day-detail">
                     {day.hasStoredRecords
-                      ? day.commitmentCount +
-                        " 项责任" +
+                      ? (day.commitmentCount > 0 ? day.commitmentCount + " 项责任" : "已有历史记录") +
+                        (day.completedCommitmentCount > 0
+                          ? " · 已完成 " + day.completedCommitmentCount + " 项"
+                          : "") +
                         (day.unknownEffortCount > 0
                           ? " · " +
                             day.unknownEffortCount +
@@ -505,13 +534,16 @@ function S02Ready({ store }: { store: DomainStore }) {
                         data-month-date={day.date}
                         data-has-records={day.hasStoredRecords ? "true" : "false"}
                       >
-                        <span className="s02-month-cell-date" aria-current={isLinked ? "date" : undefined}>
+                        <button type="button" aria-label={formatIsoDateCn(day.date) + "，查看当日安排"} onClick={() => { chooseDate(day.date); setView("today"); }} className="s02-month-cell-date" aria-current={day.date === date ? "date" : undefined}>
                           {Number(day.date.slice(8, 10))}
-                        </span>
+                        </button>
+                        {selectCommitmentsOnDate(state, day.date).slice(0, 2).map(item => <span className="s02-month-item" key={item.id}>{item.scope ?? "未命名责任"}</span>)}
+                        {day.commitmentCount > 2 && <button type="button" onClick={() => { chooseDate(day.date); setView("today"); }}>另有 {day.commitmentCount - 2} 项</button>}
                         {day.hasStoredRecords ? (
                           <span className="s02-month-cell-detail">
-                            {day.commitmentCount > 0 ? day.commitmentCount + " 项" : ""}
-                            {day.protectedCount > 0 ? (day.commitmentCount > 0 ? " · " : "") + day.protectedCount + " 段留白" : ""}
+                            {day.commitmentCount > 0 ? day.commitmentCount + " 项" : "历史"}
+                            {day.completedCommitmentCount > 0 ? " · 完成 " + day.completedCommitmentCount : ""}
+                            {day.protectedCount > 0 ? " · " + day.protectedCount + " 段留白" : ""}
                             {day.overlapMinutes > 0 ? " · 越界 " + day.overlapMinutes + " 分" : ""}
                           </span>
                         ) : (

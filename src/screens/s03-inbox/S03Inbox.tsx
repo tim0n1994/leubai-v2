@@ -49,7 +49,6 @@ import type {
   InboxRetryPlan,
 } from "./inboxAdapter.ts";
 
-const DATA_MODE = "fixture" as const;
 const CAPTURE_ROUTE = "/capture";
 const READBACK_UNVERIFIED_CODE = "STORAGE_READBACK_UNVERIFIED";
 
@@ -103,7 +102,7 @@ function S03RuntimeGate({
   onSelectRequest,
   onClearRequest,
 }: S03RuntimeGateProps) {
-  const runtime = useDomainRuntime(DATA_MODE);
+  const runtime = useDomainRuntime();
   const [retrying, setRetrying] = useState(false);
   if (runtime.status === "loading") {
     return (

@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { AuthProvider } from "../auth/AuthProvider";
 import { AccountControl } from "../auth/AccountControl";
+import { useAuth } from "../auth/use-auth";
 import "./shell.css";
 import "../settings/settings.css";
 
@@ -126,8 +127,11 @@ export function Shell({ children }: { children: ReactNode }) {
 function ShellContent({ children }: { children: ReactNode }) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const pageNumber = PAGE_NUMBERS[pathname] ?? "01";
   const pageLabel = pathname === "/settings" ? "设置" : pageNumber + " / 14";
+  const shellDate = formatShellDate();
+  const connected = Boolean(user);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -184,15 +188,15 @@ function ShellContent({ children }: { children: ReactNode }) {
             <span className="shell-brand-en">PERSONAL TIME</span>
           </div>
           <div className="shell-topbar-end">
-            <span className="shell-badge" data-shell-badge="">概念设计 · 演示状态</span>
-            <span className="shell-date" data-shell-date="">09.12 · 星期六</span>
+            <span className="shell-badge" data-shell-badge="">{connected ? "已连接 · 账号工作区" : "概念设计 · 演示状态"}</span>
+            <span className="shell-date" data-shell-date="">{shellDate}</span>
           </div>
         </header>
         <main className="shell-content" data-shell-content="">{children}</main>
         <footer className="shell-footer" data-shell-footer="">
           <div className="shell-footer-row">
             <span className="shell-footer-brand">LeuBai / 留白</span>
-            <span className="shell-footer-note">界面为独立演示状态；不代表已连接、已执行或真实收益。</span>
+            <span className="shell-footer-note">{connected ? "账号工作区已连接；外部执行仍需明确授权。" : "界面为独立演示状态；不代表已连接、已执行或真实收益。"}</span>
             <span className="shell-footer-page" data-shell-footer-page="">
               {pageLabel}
             </span>
@@ -201,6 +205,14 @@ function ShellContent({ children }: { children: ReactNode }) {
       </div>
     </div>
   );
+}
+
+function formatShellDate(): string {
+  const parts = new Intl.DateTimeFormat("zh-CN", { month: "2-digit", day: "2-digit", weekday: "long" }).formatToParts(new Date());
+  const month = parts.find((part) => part.type === "month")?.value ?? "";
+  const day = parts.find((part) => part.type === "day")?.value ?? "";
+  const weekday = parts.find((part) => part.type === "weekday")?.value ?? "";
+  return `${month}.${day} · ${weekday}`;
 }
 
 export function MobileStage({ children }: { children: ReactNode }) {

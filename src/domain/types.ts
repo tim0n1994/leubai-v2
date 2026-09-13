@@ -142,6 +142,8 @@ export interface Request extends EntityBase {
 
 export interface CommitmentSchedule {
   date: string;
+  endDate?: string;
+  allDay?: boolean;
   startMinute: number | null;
   endMinute: number | null;
   timezone: string;
@@ -556,6 +558,15 @@ export interface UpdateCommitmentCommand extends CommandBase {
   mobility?: "fixed" | "flexible";
 }
 
+export interface SaveLocalCommitmentCommand extends CommandBase {
+  type: "saveLocalCommitment";
+  scope: string;
+  effortEstimateMinutes: number | null;
+  schedule: CommitmentSchedule | null;
+  mobility: "fixed" | "flexible";
+  status: CommitmentStatus;
+}
+
 export interface SelectPlanCommand extends CommandBase {
   type: "selectPlan";
   kind: PlanKind;
@@ -729,6 +740,7 @@ export interface ContextReviewCommand extends CommandBase {
 }
 
 export type DomainCommand =
+  | SaveLocalCommitmentCommand
   | CreateProtectedBlockCommand
   | SourceRevocationCommand
   | IntentLifecycleCommand
@@ -813,7 +825,8 @@ export interface AttentionDeliveryOutcome {
 }
 
 export type CommandDataOf<C extends DomainCommand> =
-  C extends CreateProtectedBlockCommand ? { protectedBlock: ProtectedBlock; coverage: "unknown"; externalWrite: "none" }
+  C extends SaveLocalCommitmentCommand ? { commitment: Commitment }
+  : C extends CreateProtectedBlockCommand ? { protectedBlock: ProtectedBlock; coverage: "unknown"; externalWrite: "none" }
   : C extends SourceRevocationCommand ? SourceRevocationData
   : C extends IntentLifecycleCommand ? { intent: Intent; invalidatedPlanIds: EntityId[]; invalidatedApprovalIds: EntityId[] }
   : C extends ContextReviewCommand ? { contextReview: ContextReviewState }

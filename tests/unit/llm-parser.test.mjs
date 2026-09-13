@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { parseLlmSettingsText } from "../../src/settings/parser.ts";
+import { parseLlmSettingsText, suggestLlmEndpoints } from "../../src/settings/parser.ts";
 
 const FAKE_KEY = "sk-leubai-fake-unit-key-0001";
 
@@ -131,4 +131,34 @@ test("invalid protocol value reports an error", () => {
   assert.equal(parsed.protocol, undefined);
   assert.equal(parsed.model, "glm-5.3-flash");
   assert.ok(parsed.errors.some((e) => e.includes("Protocol")));
+});
+
+test("parses fenced JSON, camel case keys, and secret values without logging", () => {
+  const parsed = parseLlmSettingsText('```json\n' + JSON.stringify({ protocol: "openai", baseUrl: "https://example.test/v1", apiKey: FAKE_KEY, model: "test-model" }) + '\n```');
+  assert.equal(parsed.protocol, "openai");
+  assert.equal(parsed.baseUrl, "https://example.test/v1");
+  assert.equal(parsed.apiKey, FAKE_KEY);
+  assert.deepEqual(parsed.errors, []);
+});
+
+test("environment-style OpenAI fields infer protocol and preserve equals signs in keys", () => {
+  const parsed = parseLlmSettingsText('export OPENAI_BASE_URL="https://example.test/v1"\nOPENAI_API_KEY=example-key==\nMODEL=test-model');
+  assert.equal(parsed.protocol, "openai");
+  assert.equal(parsed.baseUrl, "https://example.test/v1");
+  assert.equal(parsed.apiKey, "example-key==");
+  assert.equal(parsed.model, "test-model");
+  assert.deepEqual(parsed.errors, []);
+});
+
+test("malformed JSON and conflicting protocol formats do not silently become valid configs", () => {
+  assert.match(parseLlmSettingsText('{"baseUrl":').errors[0], /JSON/);
+  assert.match(parseLlmSettingsText('{"apiKey":42}').errors[0], /必须是文本/);
+  assert.match(parseLlmSettingsText('OPENAI_BASE_URL=https://example.test\nProtocol: anthropic').errors[0], /多个不同/);
+});
+
+test("endpoint suggestions retain custom path prefixes and never reuse credentials", () => {
+  assert.deepEqual(suggestLlmEndpoints("https://example.test/proxy/v1/", "openai"), { messagesUrl: "https://example.test/proxy/v1/chat/completions", modelsUrl: "https://example.test/proxy/v1/models" });
+  assert.deepEqual(suggestLlmEndpoints("http://localhost:10101", "anthropic"), { messagesUrl: "http://localhost:10101/v1/messages", modelsUrl: "http://localhost:10101/v1/models" });
+  assert.equal(suggestLlmEndpoints("https://user:secret@example.test", "openai"), null);
+  assert.equal(suggestLlmEndpoints("https://example.test?key=secret", "openai"), null);
 });

@@ -7,7 +7,7 @@ export function ContextReviewSurface({
 }: {
 	children: (store: DomainStore) => ReactNode;
 }) {
-	const runtime = useDomainRuntime("fixture");
+	const runtime = useDomainRuntime();
 	if (runtime.status === "loading")
 		return <p role="status">正在读取本地记录。</p>;
 	if (runtime.status !== "ready")

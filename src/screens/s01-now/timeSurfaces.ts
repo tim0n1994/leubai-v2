@@ -9,6 +9,7 @@ import type {
   Source,
   TimeRange,
 } from "../../domain/index.ts";
+import { scheduleSlice, zonedParts } from "../../domain/calendarTime.ts";
 
 export const SURFACE_AXIS_START_MINUTE = 1020;
 export const SURFACE_AXIS_END_MINUTE = 1230;
@@ -98,6 +99,7 @@ export function selectSurfaceDate(
   state: DomainState,
   fallbackDate: string = FIXTURE_DAY,
 ): string {
+  if (state.dataMode === "live") return zonedParts(Date.now(), state.ruleset.timezone).date;
   const protectedDates = Object.values(state.protectedBlocks)
     .filter((block) => block.status === "active")
     .map((block) => isoDateOf(block.range.start))
@@ -125,19 +127,23 @@ export interface ProtectedIntervalView {
 export function selectProtectedIntervals(
   state: DomainState,
   date: string,
+  timezone = state.ruleset.timezone,
 ): ProtectedIntervalView[] {
   const rows: ProtectedIntervalView[] = [];
   for (const block of Object.values(state.protectedBlocks)) {
     if (block.status !== "active") continue;
-    const startDate = isoDateOf(block.range.start);
-    const endDate = isoDateOf(block.range.end);
+    const start = zonedParts(block.range.start, timezone);
+    const end = zonedParts(block.range.end, timezone);
+    const startDate = start.date;
+    const endDate = end.date;
     if (endDate < date || startDate > date) continue;
+    if (endDate === date && end.minute === 0) continue;
     rows.push({
       id: block.id,
       blockId: block.blockId,
       purpose: block.purpose,
-      startMinute: startDate === date ? minuteOfDay(block.range.start) : 0,
-      endMinute: endDate === date ? minuteOfDay(block.range.end) : 1440,
+      startMinute: startDate === date ? start.minute : 0,
+      endMinute: endDate === date ? end.minute : 1440,
       startIso: block.range.start,
       endIso: block.range.end,
       timezone: block.range.timezone,
@@ -198,6 +204,18 @@ export function toCommitmentView(
   };
 }
 
+function commitmentOccursOnDate(
+  commitment: Commitment,
+  date: string,
+  timezone: string,
+): boolean {
+  const schedule = commitment.schedule;
+  return schedule !== null && (
+    scheduleSlice(schedule, date, timezone) !== null ||
+    (!schedule.allDay && schedule.startMinute === null && schedule.date === date)
+  );
+}
+
 export function selectCommitmentsOnDate(
   state: DomainState,
   date: string,
@@ -206,10 +224,12 @@ export function selectCommitmentsOnDate(
     .filter(
       (commitment) =>
         commitment.status === "active" &&
-        commitment.schedule &&
-        commitment.schedule.date === date,
+        commitmentOccursOnDate(commitment, date, state.ruleset.timezone),
     )
-    .map((commitment) => toCommitmentView(state, commitment))
+    .map((commitment) => {
+      const slice = commitment.schedule && scheduleSlice(commitment.schedule, date, state.ruleset.timezone);
+      return toCommitmentView(state, slice ? { ...commitment, schedule: { date, ...slice, timezone: state.ruleset.timezone } } : commitment);
+    })
     .sort(
       (a, b) =>
         (a.schedule?.startMinute ?? 1441) - (b.schedule?.startMinute ?? 1441) ||
@@ -224,7 +244,7 @@ export function selectUnscheduledCommitments(
     .filter(
       (commitment) =>
         commitment.status === "active" &&
-        (!commitment.schedule || commitment.schedule.startMinute === null),
+        (!commitment.schedule || (commitment.schedule.startMinute === null && !commitment.schedule.allDay)),
     )
     .map((commitment) => toCommitmentView(state, commitment))
     .sort((a, b) => a.id.localeCompare(b.id));
@@ -247,7 +267,7 @@ export function selectProtectedOverlaps(
   ),
 ): ProtectedOverlapView[] {
   const rows: ProtectedOverlapView[] = [];
-  for (const commitment of Object.values(state.commitments)) {
+  for (const commitment of selectCommitmentsOnDate(state, date)) {
     if (
       commitment.status !== "active" ||
       !commitment.schedule ||
@@ -388,7 +408,7 @@ export function selectTimelineSurface(
   const blocks: TimelineBlockView[] = [];
   let excludedBlockCount = 0;
   const unscheduled = selectUnscheduledCommitments(state);
-  for (const commitment of Object.values(state.commitments)) {
+  for (const commitment of selectCommitmentsOnDate(state, date)) {
     if (commitment.status !== "active") continue;
     if (
       !commitment.schedule ||
@@ -408,7 +428,7 @@ export function selectTimelineSurface(
       continue;
     }
     blocks.push({
-      ...toCommitmentView(state, commitment),
+      ...commitment,
       topPx: minuteToTrackPx(geometry, clamped.startMinute),
       heightPx: pxSpan(clamped.startMinute, clamped.endMinute, geometry),
       clippedStart: clamped.clippedStart,
@@ -438,7 +458,7 @@ export function selectTimelineSurface(
   });
   return {
     geometry,
-    hourLabels: trackHourLabels(geometry),
+    hourLabels: trackHourLabels(geometry, geometry.axisEndMinute - geometry.axisStartMinute > 720 ? 120 : 30),
     blocks,
     excludedBlockCount,
     unscheduled,
@@ -472,6 +492,8 @@ export interface WeekDayView {
   date: string;
   weekdayLabel: string;
   commitmentCount: number;
+  storedCommitmentCount: number;
+  completedCommitmentCount: number;
   knownEffortMinutes: number;
   unknownEffortCount: number;
   protectedCount: number;
@@ -488,23 +510,28 @@ export interface WeekSurfaceView {
 
 function selectDayView(state: DomainState, date: string): WeekDayView {
   const commitments = selectCommitmentsOnDate(state, date);
+  const storedCommitments = Object.values(state.commitments).filter((commitment) =>
+    commitmentOccursOnDate(commitment, date, state.ruleset.timezone),
+  );
+  const completedCommitmentCount = storedCommitments.filter(
+    (commitment) => commitment.status === "done",
+  ).length;
   const protectedCount = selectProtectedIntervals(state, date).length;
   const unknownEffortCount = commitments.filter(
     (c) => c.effortEstimateMinutes === null,
   ).length;
-  const knownEffortMinutes = commitments.reduce(
-    (sum, c) => sum + (c.effortEstimateMinutes ?? 0),
-    0,
-  );
+  const knownEffortMinutes = selectCapacitySummary(state, date).committedKnownMinutes;
   return {
     date,
     weekdayLabel: WEEKDAY_LABELS[weekdayIndexOf(date)],
     commitmentCount: commitments.length,
+    storedCommitmentCount: storedCommitments.length,
+    completedCommitmentCount,
     knownEffortMinutes,
     unknownEffortCount,
     protectedCount,
     overlapMinutes: totalOverlapMinutes(selectProtectedOverlaps(state, date)),
-    hasStoredRecords: commitments.length > 0 || protectedCount > 0,
+    hasStoredRecords: protectedCount > 0 || storedCommitments.length > 0,
   };
 }
 
@@ -634,7 +661,9 @@ export interface HeroView {
 }
 
 export function selectHeroView(state: DomainState, date: string): HeroView {
-  const intervals = selectProtectedIntervals(state, date);
+  const intervals = Object.values(state.protectedBlocks).flatMap(block =>
+    selectProtectedIntervals({ ...state, protectedBlocks: { [block.id]: block } }, date, block.range.timezone),
+  ).sort((a, b) => a.startMinute - b.startMinute);
   return { date, protectedInterval: intervals[0] ?? null };
 }
 
