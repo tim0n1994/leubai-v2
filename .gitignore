@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Local Codex evidence and browser test artifacts
+.omo/
+test-results/
+
 # LeuBai local private settings (0700 dir / 0600 file, never committed)
 .leubai-local/
 
