@@ -444,10 +444,52 @@ test.describe("[s16] 移动端 · 自适应方案", () => {
 });
 
 test.describe("[s17] 移动端 · 一次性授权", () => {
+  const s17ConsoleLogs = new WeakMap<Page, string[]>();
+
+  function watchS17Errors(page: Page): string[] {
+    const existing = s17ConsoleLogs.get(page);
+    if (existing) {
+      return existing;
+    }
+    const errors: string[] = [];
+    s17ConsoleLogs.set(page, errors);
+    page.on("pageerror", (e) => errors.push(String(e)));
+    page.on("console", (m) => {
+      if (m.type() === "error") errors.push(m.text());
+    });
+    return errors;
+  }
+
+  function safeS17EvidenceName(value: string): string {
+    return value.replace(/[^a-zA-Z0-9\u4e00-\u9fff]+/g, "-").slice(0, 80);
+  }
+
+  test.afterEach(async ({ page }, testInfo) => {
+    const errors = s17ConsoleLogs.get(page);
+    if (!errors) {
+      return;
+    }
+    await testInfo.attach(
+      "gate-functional-console-groupC-" +
+        testInfo.project.name +
+        "-" +
+        safeS17EvidenceName(testInfo.title) +
+        ".json",
+      {
+        body: JSON.stringify(
+          { project: testInfo.project.name, title: testInfo.title, errors },
+          null,
+          2,
+        ),
+        contentType: "application/json",
+      },
+    );
+  });
+
   test("allowed scope and exclusions stay on the same screen", async ({
     page,
   }) => {
-    const errors = watchErrors(page);
+    const errors = watchS17Errors(page);
     await page.goto("/m/auth");
     const root = page.locator('[data-page="s17"]');
     await expect(root).toBeVisible();
@@ -481,12 +523,15 @@ test.describe("[s17] 移动端 · 一次性授权", () => {
     await expect(
       root.getByRole("link", { name: "返回修改方案" }),
     ).toBeVisible();
+    await root.getByRole("link", { name: "返回修改方案" }).click();
+    await expect(page).toHaveURL(/\/m\/plan$/);
     expect(errors).toEqual([]);
   });
 
-  test("approve is one-time, disabled with reason when scope empty", async ({
+  test("approve is one-time and the used receipt blocks re-execution", async ({
     page,
   }) => {
+    const errors = watchS17Errors(page);
     await page.goto("/m/auth");
     const root = page.locator('[data-page="s17"]');
     const approve = root.getByRole("button", { name: "批准并准备草稿" });
@@ -495,8 +540,13 @@ test.describe("[s17] 移动端 · 一次性授权", () => {
       root.getByText("本次授权已使用。草稿待检查，不会自动发送。"),
     ).toBeVisible();
     await expect(approve).toBeDisabled();
-    await root.getByRole("link", { name: "返回修改方案" }).click();
-    await expect(page).toHaveURL(/\/m\/plan$/);
+    expect(errors).toEqual([]);
+  });
+
+  test("empty grant set keeps the action disabled with a reason", async ({
+    page,
+  }) => {
+    const errors = watchS17Errors(page);
     await page.goto("/m/auth");
     const fresh = page.locator('[data-page="s17"]');
     const checkboxes = fresh.getByRole("checkbox");
@@ -509,6 +559,7 @@ test.describe("[s17] 移动端 · 一次性授权", () => {
     await expect(
       fresh.getByText("至少允许一项动作，或返回修改方案。"),
     ).toBeVisible();
+    expect(errors).toEqual([]);
   });
 });
 

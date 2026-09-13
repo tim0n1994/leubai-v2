@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# LeuBai local private settings (0700 dir / 0600 file, never committed)
+.leubai-local/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
