@@ -933,3 +933,87 @@
   color: var(--text-2);
   font-size: 13px;
 }
+
+.s02-month {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 40px;
+  border: 1px dashed var(--divider);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+}
+
+.s02-month-label {
+  margin: 0;
+  font-size: 18px;
+  color: var(--text);
+}
+
+.s02-month-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.s02-month-head,
+.s02-month-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.s02-month-head span {
+  padding: 6px 0;
+  color: var(--text-2);
+  font-size: 13px;
+  text-align: center;
+}
+
+.s02-month-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 64px;
+  padding: 8px;
+  border: 1px solid var(--divider);
+  border-radius: 8px;
+  background: var(--surface-1);
+}
+
+.s02-month-cell-date {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.s02-month-cell-detail {
+  color: var(--text-2);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.s02-month-cell.is-outside {
+  opacity: 0.45;
+}
+
+.s02-month-cell.is-unknown .s02-month-cell-detail {
+  color: var(--warm);
+}
+
+.s02-month-cell.is-linked {
+  border-color: var(--info);
+  box-shadow: inset 0 0 0 1px var(--info);
+}
+
+.s02-month-note {
+  margin: 4px 0 0;
+  color: var(--text-2);
+  font-size: 14px;
+}
+
+.s02-month-src {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 13px;
+}

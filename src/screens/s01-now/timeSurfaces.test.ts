@@ -28,6 +28,7 @@ import {
   selectCommitmentsOnDate,
   selectDutyCards,
   selectHeroView,
+  selectMonthSurface,
   selectModificationView,
   selectProtectedOverlaps,
   selectSourceRows,
@@ -37,6 +38,7 @@ import {
   totalOverlapMinutes,
   trackHourLabels,
   weekDatesContaining,
+  monthGridDates,
 } from "./timeSurfaces.ts";
 
 const NOW = "2026-09-12T10:00:00+08:00";
@@ -255,6 +257,33 @@ test("protected overlap is derived from schedule times separately from the estim
   assert.equal(overlaps[0].commitmentId, FIXTURE_IDS.commitmentAdmin);
   assert.deepEqual([overlaps[0].startMinute, overlaps[0].endMinute, overlaps[0].minutes], [1140, 1150, 10]);
   assert.equal(totalOverlapMinutes(overlaps), 10);
+});
+
+test("month grid covers the full calendar month aligned to Monday weeks", () => {
+  const grid = monthGridDates("2026-09-12");
+  assert.equal(grid.length % 7, 0);
+  assert.equal(grid[0], "2026-08-31");
+  assert.ok(grid.includes("2026-09-01"));
+  assert.ok(grid.includes("2026-09-30"));
+  assert.ok(!grid.includes("2026-10-11"));
+  const firstWeek = grid.slice(0, 7);
+  assert.equal(firstWeek[6], "2026-09-06");
+});
+
+test("month surface aggregates per-day records and marks empty days unknown", () => {
+  const state = createInitialState("fixture");
+  const month = selectMonthSurface(state, "2026-09-12");
+  assert.equal(month.year, 2026);
+  assert.equal(month.month, 9);
+  assert.equal(month.label, "2026 年 9 月");
+  const byDate = new Map(month.weeks.flat().map((day) => [day.date, day]));
+  assert.equal(byDate.get("2026-09-12")?.commitmentCount, 3);
+  assert.equal(byDate.get("2026-09-12")?.knownEffortMinutes, 130);
+  assert.equal(byDate.get("2026-09-12")?.protectedCount, 1);
+  assert.equal(byDate.get("2026-09-13")?.hasStoredRecords, false);
+  const outside = byDate.get("2026-08-31");
+  assert.ok(outside);
+  assert.equal(outside.hasStoredRecords, false);
 });
 
 test("timeline geometry maps stored minutes onto the existing 430px track", () => {
