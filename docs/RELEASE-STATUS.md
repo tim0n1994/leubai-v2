@@ -7,9 +7,10 @@
 ### RC12 注册链路实通与月视图补齐
 
 - 注册验证码链路已在 loopback `127.0.0.1:5201` 实测打通：`POST /api/auth/send-code`（console 通道）返回 `devCode`，随即 `POST /api/auth/register` 用该验证码创建用户成功，返回完整用户对象（`emailVerified:true`）。前端错误映射确认：服务器 `EMAIL_UNAVAILABLE` 的友好文案（"邮箱验证服务尚未配置，请联系管理员。"）经 `auth-client.ts` 直接展示，不暴露原始错误码。公网 `:5220`（`EMAIL_TRANSPORT=disabled`）按设计返回 `EMAIL_UNAVAILABLE`；真实邮件收发（Resend/SMTP 凭据）仍未配置，属用户侧待办。
+- 注册公网通道已配置 Resend 并实测进入真实发送：用户提供的发送专用 Resend key 写入 gitignored `.leubai-local/env`（`LEUBAI_SENDER_*` 前缀隔离，`:5201` 保持 console）。`:5220` 以 `EMAIL_TRANSPORT=resend`、`LEUBAI_PUBLIC_ORIGIN`、`LEUBAI_TRUST_CLOUDFLARE=1` 重启（tty 会话常驻）。内置浏览器实测公网注册 UI：退出旧会话 → 打开注册 → 填入 `test-rc12@udify.fun` → 发送验证码 → UI 进入"验证码已发送至 test-rc12@udify.fun"步骤（服务端 Resend 拒绝会报错而非进入该步），公网不再显示 devCode，console 全程零错误。**邮箱实际收件待用户确认**（Resend key 为发送专用，无查询权限）。
 - 时间账本月视图已补齐：`timeSurfaces.ts` 新增 `monthGridDates`（周一开头、自动 5/6 行补齐邻月）与 `selectMonthSurface`（复用与周视图相同的逐日聚合）；`S02Ledger.tsx` 增加"本月"分段视图（7 列网格、邻月淡化、无记录日期显式"无记录"未知态、当日/定位日高亮）。`npm run test:unit` 592/592（新增 2 项月视图测试）、lint 退出 0、build 退出 0。
 - 内置浏览器实测（iab，`http://127.0.0.1:5201/ledger`）：点击"本月"后网格渲染 35 格（2026 年 9 月 5 行）、邻月 5 天淡化、9/12 聚合"3 项 · 1 段留白 · 越界 10 分"与 fixture 一致、其余日期显式"无记录"；全程 console 错误为空。截图见 `.omo/evidence/rc12-month-view-20260913.md`。
-- 边界：月视图数据源仍为本地 fixture/已保存记录，不含未接入来源；注册链路的真实邮件收发、公网注册开放仍待邮件凭据配置后另测。
+- 边界：月视图数据源仍为本地 fixture/已保存记录，不含未接入来源；`test-rc12@udify.fun` 的完整注册（输入邮件中的验证码）与真实收件确认待用户侧完成后闭环。服务器常驻方式为前台 tty 会话，launchd 持久化仍未安装。
 
 ### RC11 认证与部署收尾快照（覆盖 RC10 中“S09 正在补齐”与旧测试计数）
 
