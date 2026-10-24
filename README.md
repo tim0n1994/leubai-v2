@@ -1,5 +1,7 @@
 # LeuBai V2
 
+[![CI](https://github.com/tim0n1994/leubai-v2/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/tim0n1994/leubai-v2/actions/workflows/ci.yml) [![Preview release](https://img.shields.io/github/v/release/tim0n1994/leubai-v2?include_prereleases&label=preview)](https://github.com/tim0n1994/leubai-v2/releases)
+
 > 把时间还给人。
 
 ### A local-first Personal Agency Layer for intent, responsibility, authorization, action, and protected time.
@@ -15,7 +17,7 @@ LeuBai 让个人保留对时间和行动的判断权。它把意图、责任、�
 
 LeuBai 的核心判断很简单：请求不等于承诺，建议不等于同意，“已发出”不等于“已收到”。系统需要把这些状态分开记录，也需要允许人拒绝、修正、暂停、撤回和退出。
 
-工程版本为 `0.0.0`；文中的 V2 / V3 是阶段名称，不是发布版本号。
+工程版本为 `0.0.0`；当前可复现的发布入口是 [`v0.0.0-preview.1`](https://github.com/tim0n1994/leubai-v2/releases/tag/v0.0.0-preview.1)。文中的 V2 / V3 是阶段名称，不是发布版本号。
 
 ## Start locally
 
