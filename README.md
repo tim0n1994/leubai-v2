@@ -19,7 +19,7 @@ LeuBai 让个人保留对时间和行动的判断权。它把意图、责任、�
 
 LeuBai 的核心判断很简单：请求不等于承诺，建议不等于同意，“已发出”不等于“已收到”。系统需要把这些状态分开记录，也需要允许人拒绝、修正、暂停、撤回和退出。
 
-工程版本为 `0.0.0`；当前可复现的发布入口是 [`v0.0.0-preview.2`](https://github.com/tim0n1994/leubai-v2/releases/tag/v0.0.0-preview.2)。文中的 V2 / V3 是阶段名称，不是发布版本号。
+工程版本为 `0.0.0`；当前可复现的发布入口是 [`v0.0.0-preview.3`](https://github.com/tim0n1994/leubai-v2/releases/tag/v0.0.0-preview.3)。文中的 V2 / V3 是阶段名称，不是发布版本号。
 
 ## Start locally
 
