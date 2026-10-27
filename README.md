@@ -2,7 +2,7 @@
 
 [English](README.en.md)
 
-[![CI](https://github.com/tim0n1994/leubai-v2/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/tim0n1994/leubai-v2/actions/workflows/ci.yml) [![Preview release](https://img.shields.io/github/v/release/tim0n1994/leubai-v2?include_prereleases&label=preview)](https://github.com/tim0n1994/leubai-v2/releases)
+[![CI](https://github.com/tim0n1994/leubai-v2/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/tim0n1994/leubai-v2/actions/workflows/ci.yml) [![Preview release](https://img.shields.io/github/v/release/tim0n1994/leubai-v2?include_prereleases&label=preview)](https://github.com/tim0n1994/leubai-v2/releases) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 > 把时间还给人。
 
