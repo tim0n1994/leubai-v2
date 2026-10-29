@@ -39,6 +39,6 @@ Open http://127.0.0.1:5200. The same local entry serves the built page and local
 
 ## Release boundary
 
-The current reproducible entry is [v0.0.0-preview.3](https://github.com/tim0n1994/leubai-v2/releases/tag/v0.0.0-preview.3). V2 and V3 in the repository are stage names, not release numbers.
+The current reproducible public preview is [v0.0.0-preview.4](https://github.com/tim0n1994/leubai-v2/releases/tag/v0.0.0-preview.4). V2 and V3 in the repository are stage names, not release numbers.
 
-The design/ assets are static design references. They are not runtime screenshots, and full 1:1 visual acceptance is still a separate verification task.
+LeuBai is a public preview, not a production product. The design/ assets are static design references, not runtime screenshots; real deployment, visual acceptance, and device acceptance are separate evidence layers. Source code, CI, or design assets do not substitute for those checks.
