@@ -11,6 +11,7 @@
     "server": "LEUBAI_DEV=1 node server/start.mjs",
     "preview": "vite preview",
     "test:unit": "node scripts/test-unit.mjs",
+    "check:privacy": "node scripts/check-public-privacy.mjs",
     "test:e2e": "playwright test"
   },
   "dependencies": {

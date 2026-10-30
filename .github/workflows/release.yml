@@ -23,6 +23,9 @@ jobs:
       - name: Install
         run: bun install --frozen-lockfile
 
+      - name: Privacy guard
+        run: bun run check:privacy
+
       - name: Unit tests
         run: bun run test:unit
 

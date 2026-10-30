@@ -1,15 +1,15 @@
 # 留白 V2 交付矩阵
 
-日期：2026-09-12。状态：规划基线，尚未完成交付验收。目标为18屏1:1、全部功能与交互、用户C1–C5上线级本地交付验证。编码和产品验证由用户指定的implementation-agent执行；原生/主监督独立只读验收，本轮仅文档规划与只读审查。外部账户实测及公开发布另需具体授权，不无限阻断本地交付。
+日期：2026-09-12。状态：规划基线，尚未完成交付验收。目标为18屏1:1、全部功能与交互、用户C1–C5上线级本地交付验证。编码和产品验证由用户指定的实现代理执行；原生/主监督独立只读验收，本轮仅文档规划与只读审查。外部账户实测及公开发布另需具体授权，不无限阻断本地交付。
 
 ## 阅读规则与证据状态
 
 - `D:n` 指 `design/UIUX_交互规范.md` 的原始行号；引号内是已读设计原文。逐屏“PRD”指 `docs/PRD.md` 第4节对应同名屏幕的布局、模型、交互、状态与全部原验收项，不因本矩阵简写而删除细节。跨屏行为细化是 `docs/V2_IMPLEMENTATION_CONTRACT.md` 的实施决定。
-- 每屏标题中的源码路径是本屏所有行的默认实现位置，配套CSS在同目录；共享命令指向实施合同规划的 `src/domain/**`、`src/data/**`，尚未声称已实现。图像路径为对应源设计依据；本轮没有重新目视比较PNG，C1一律待implementation-agent真实浏览器复核。
+- 每屏标题中的源码路径是本屏所有行的默认实现位置，配套CSS在同目录；共享命令指向实施合同规划的 `src/domain/**`、`src/data/**`，尚未声称已实现。图像路径为对应源设计依据；本轮没有重新目视比较PNG，C1一律待实现代理真实浏览器复核。
 - 每屏“继承证据”适用于其全部行；历史截图和测试文件存在不等于行已通过。行里的E编号是下一轮所需证据ID：`E-{需求ID}`；文件建议 `evidence/final/<ID>.md`，同时列出截图/运行日志引用，记录版本、时间、视口、fixture/live、前提、步骤、预期与实际结果。
-- `OPEN`：需求未完成验收，可能已有部分静态实现；`GAP`：只读代码或已读评审已确认缺口；`UNKNOWN`：本轮未验证该行为；`BLOCKED`：明确缺外部授权/环境。只有implementation-agent实际执行对应用例并附证据后才能填写VERIFIED，不能凭静态实现标PASS。
+- `OPEN`：需求未完成验收，可能已有部分静态实现；`GAP`：只读代码或已读评审已确认缺口；`UNKNOWN`：本轮未验证该行为；`BLOCKED`：明确缺外部授权/环境。只有实现代理实际执行对应用例并附证据后才能填写VERIFIED，不能凭静态实现标PASS。
 - 每个子编号是独立需求与证据，例如 `I01/I02` 必须分别执行；每屏 `AC01–AC04` 是PRD原四项验收标准，逐条保留，不能以布局行代替。矩阵可以继续拆分新发现的可见控件，但不能删除未实现行来减少分母。
-- 每项行为改变在生产代码修改前由implementation-agent捕获针对真实缺陷的RED，修改后同案例GREEN；E记录须分别引用红绿证据及版本。文案stub RED只算历史局部证据。没有历史真实RED就标缺口，不补写虚构失败，也不以只读规划作为产品验证。
+- 每项行为改变在生产代码修改前由实现代理捕获针对真实缺陷的RED，修改后同案例GREEN；E记录须分别引用红绿证据及版本。文案stub RED只算历史局部证据。没有历史真实RED就标缺口，不补写虚构失败，也不以只读规划作为产品验证。
 
 用户验收编号固定为：C1＝18屏真实浏览器布局截图；C2＝全部交互E2E；C3＝详细PRD映射；C4＝构建/检查/console；C5＝空错非法回归及保留空白。所有本矩阵行均属于C3；表中C列列出其他对应门槛。旧评审C编号不直接沿用。
 
@@ -56,7 +56,7 @@
 | GLOBAL-S06模式隔离；S07恢复/迁移失败 | fixture与live存储隔离；迁移失败保留数据并显示恢复路径 | 不能清空用户数据装成功 | C5 | UNKNOWN |
 | GLOBAL-L02字体/令牌/图形；L03响应式；L04动效 | 18屏原图对照；字体放大可滚动；减少动态效果生效 | PNG原图未在本轮重审 | C1/C2 | OPEN |
 | GLOBAL-I07全键盘路径；I08触控/读屏语义 | 每项时间变更非拖拽路径、44px目标、标签/焦点/阅读顺序 | 完整交互面待证 | C2/C5 | UNKNOWN |
-| GLOBAL-C401类型；C402构建；C403静态检查；C404console | implementation-agent逐项实际运行并记录退出码/浏览器错误/版本 | GH仅历史结果；26跳过需逐项归因 | C4 | UNKNOWN |
+| GLOBAL-C401类型；C402构建；C403静态检查；C404console | 实现代理逐项实际运行并记录退出码/浏览器错误/版本 | GH仅历史结果；26跳过需逐项归因 | C4 | UNKNOWN |
 
 ## s01 此刻 · 时间主权
 
@@ -252,7 +252,7 @@
 
 | ID/功能 | 真实交互/持久结果 | 缺口或待证 | C | 状态 |
 |---|---|---|---|---|
-| S15-L01状态栏/品牌/椭环/时间卡/决定/约束/tab | 480×1040原图与字体放大，数据与s01同源 | 全屏视觉待implementation-agent | C1 | OPEN |
+| S15-L01状态栏/品牌/椭环/时间卡/决定/约束/tab | 480×1040原图与字体放大，数据与s01同源 | 全屏视觉待实现代理 | C1 | OPEN |
 | S15-I01时间卡 | 到账本同一block/日期，不丢意图 | DzbJGvDP构建Ego实点同intent/date/stable blockId到S02定位，周视图保留，错日期拒绝；mobile-ledger-preflight-20260913 | C2 | PASS |
 | S15-I02查看两路径 | 到s16持久正确计划上下文 | navigate不等于状态链 | C2 | OPEN |
 | S15-I03⋯；I04此刻tab；I05时间tab；I06协同tab；I07我的tab | 每项独立可达，与GLOBAL移动导航共用 | 不得以单一烟测覆盖全部 | C2 | OPEN |
@@ -291,7 +291,7 @@
 
 | ID/功能 | 真实交互/持久结果 | 缺口或待证 | C | 状态 |
 |---|---|---|---|---|
-| S18-L01状态栏/品牌×/开放椭环/时间/唯一主动作/范围 | 隐藏tab，保留退出，原图1:1 | 逐区待implementation-agent浏览器证据 | C1 | OPEN |
+| S18-L01状态栏/品牌×/开放椭环/时间/唯一主动作/范围 | 隐藏tab，保留退出，原图1:1 | 逐区待实现代理浏览器证据 | C1 | OPEN |
 | S18-I01什么也不安排 | 持久keepBlank/suppressPrompts，关闭回来源 | 新Ego证据S08选择→S18同block已保留；关闭→重入刷新保持；新本地A方案/操作后仍保留 | C2/C5 | OPEN：全部故障态待验 |
 | S18-I02× | 保存状态后回实际来源屏，后备移动首页 | 实际保留ledger查询返回，quiet循环目标拒绝；修复退出覆盖keepBlank及跨tab缓存核验问题，双页无刷新同步→关闭已验 | C2/C5 | OPEN：存储失败UI仍待验 |
 | S18-S01未选择；S02刷新/跨屏；S03新建议；S04保存失败 | 不催促/不填充，不虚报已保存，安静状态保留 | 合同§8 | C5 | OPEN |
@@ -320,7 +320,7 @@
 
 ### 在途修复证据索引（不关闭验收）
 
-当前整合所有权：`domain_finish`负责`src/domain/**`；`src/data/**`独占由主控监督的 implementation-agent 持久化任务负责。`functional_finalize`负责s05/s14/s17；`workspace_integrate`负责s06和`src/runtime/**`。用户新增的品牌、后台 LLM 与风格切换见 `docs/SETTINGS-AND-INK-ADDENDUM.md`：后台设置、水墨主题分别由独立 implementation-agent 实现任务负责，互不修改业务所有者文件。实现进展以 `.omo/evidence/*-final-implementation-implementation-agent.jsonl` 和各所有者最终报告为准，不把易过期的进程号当作完成证据。工作台使用`createPersistedDomainStore`、`useDomainState`、`Operation.resultRefs`和`confirmSections/saveCheckpoint`；正文编辑/撤回由领域所有者补齐。现有私有storage key仅为过渡，不能通过复制草稿到另一key关闭FLOW-01。各页只在统一`store.execute`成功后发布已保存/已批准状态；真正跨tab原子性及存储失败仍需独立证据。
+当前整合所有权：`domain_finish`负责`src/domain/**`；`src/data/**`独占由主控监督的 实现代理 持久化任务负责。`functional_finalize`负责s05/s14/s17；`workspace_integrate`负责s06和`src/runtime/**`。用户新增的品牌、后台 LLM 与风格切换见 `docs/SETTINGS-AND-INK-ADDENDUM.md`：后台设置、水墨主题分别由独立 实现代理 实现任务负责，互不修改业务所有者文件。实现进展以 私有执行记录（仓库外） 和各所有者最终报告为准，不把易过期的进程号当作完成证据。工作台使用`createPersistedDomainStore`、`useDomainState`、`Operation.resultRefs`和`confirmSections/saveCheckpoint`；正文编辑/撤回由领域所有者补齐。现有私有storage key仅为过渡，不能通过复制草稿到另一key关闭FLOW-01。各页只在统一`store.execute`成功后发布已保存/已批准状态；真正跨tab原子性及存储失败仍需独立证据。
 
 2026-09-12 最新浏览器约束覆盖本文件较早的执行方式：浏览器验证只能使用 Codex 内置浏览器或 Ego Lite，不能运行独立 Playwright/Chromium、gstack 或其他浏览器。实现任务只做明确列出的非浏览器检查，主控统一使用 Ego Lite TaskSpace 1 完成页面验收。现有浏览器测试文件可以作为用例参考，但不得直接执行；历史结果与新约束下的实际验证分开记录。主控已在 Ego Lite 确认 `/settings` 尚未挂载、前端仍有旧英文品牌，截图为 `.omo/evidence/egolite-settings-red.png`；这是新增 B1/B2 的失败基线，不是完成证明。
 
@@ -334,7 +334,7 @@
 |---|---|---|
 | s05/s14/s17 第一轮 | 30次行为测试：RED为28失败/2通过，修复后30通过；不是完整跨屏验证 | `.omo/evidence/gate-functional-red.log`、`gate-functional-result.md`；刷新、部分许可、存储失败和旧草稿隔离仍需下轮证据 |
 | s05/s14/s17 针对性修正 | 13用例×两项目，RED为22失败/4已有通过，命令退出1；尚待GREEN | `.omo/evidence/gate-functional-delta-red.log`；运行项目包含强制桌面视口，不能计真实移动适配通过 |
-| Shell 修正 | 首轮局部绿测未验收；复核发现短视口头像不可达及40px触控目标、重复coverage | `.omo/evidence/shell-implementation-agent-review-execution.jsonl`；短屏真实RED已报告，需最终GREEN和原图对照；首轮被清理的RED PNG明确缺失，不补造 |
+| Shell 修正 | 首轮局部绿测未验收；复核发现短视口头像不可达及40px触控目标、重复coverage | 私有执行记录（仓库外）；短屏真实RED已报告，需最终GREEN和原图对照；首轮被清理的RED PNG明确缺失，不补造 |
 | 共享领域/存储 | 12项注入内存存储测试通过，未证明跨tab原子性、未有该层先行RED | `.omo/evidence/domain-api.md`、`domain-supervisor-feedback.md`；API仍PLANNED，默认seed与真正并发安全阻断接入 |
 
 ### 2026-09-12 主监督浏览器失败基线
@@ -343,12 +343,12 @@
 
 - 场景 `E-S05-I01-BASELINE` / `FLOW-01`：首页“看看可行的做法” → `/plan` 选择 A → `/preview` 点击“批准并准备草稿”。实际仍停在 `/preview`，仅显示“已批准·本次准备任务 尚未执行”，未得到可观察本地产物。C2：FAIL。
 - 场景 `E-S05-S03-RELOAD-BASELINE`：上述批准后 reload，回到待批准且批准按钮重新出现，审批/产物没有恢复。C5：FAIL；不能用重新显示按钮证明幂等执行。
-- 同次 walkthrough 的 console error/warn 为空，仅支持该操作路径的控制台观察，不关闭产品 C4 或抵消功能失败。主监督已归档[人工 CUA 操作日志](/redacted-personal-home/Proj/AIGC/research/output/argus-omo-control-plane/LEUBAI-V2-BROWSER-BASELINE-20260912.md)，本任务已全文读取；它不是自动 trace，未保存观察时源码 hash。截图仅在监督任务中 inline 显示，没有 PNG 文件，不能虚构截图路径或计为逐屏视觉通过。
+- 同次 walkthrough 的 console error/warn 为空，仅支持该操作路径的控制台观察，不关闭产品 C4 或抵消功能失败。主监督已归档人工 CUA 操作日志（仓库外路径已脱敏），本任务已全文读取；它不是自动 trace，未保存观察时源码 hash。截图仅在监督任务中 inline 显示，没有 PNG 文件，不能虚构截图路径或计为逐屏视觉通过。
 - 修复后的同案例必须证明：有效批准 → 真实本地产物及回读 → 刷新恢复同一操作/产物 → 重复请求不重复生成；保存对应该运行版本的浏览器操作、截图及持久结果，再关闭上述失败。
 
 ### 主监督 09:23 UTC 局部复测与跨屏失败
 
-同一[CUA 日志](/redacted-personal-home/Proj/AIGC/research/output/argus-omo-control-plane/LEUBAI-V2-BROWSER-BASELINE-20260912.md)新增实测：`/preview` 批准后出现可编辑草稿，修改为指定验收文本后 reload 及新 tab 均恢复相同正文和已批准状态。原 `E-S05-I01-BASELINE` 的“无草稿”症状和 `E-S05-S03-RELOAD-BASELINE` 的“刷新丢状态”症状，在该快照的正常存储场景关闭；这不等于整个 S05-I01、C2/C5 或幂等/存储故障通过。
+同一 CUA 日志（仓库外路径已脱敏）新增实测：`/preview` 批准后出现可编辑草稿，修改为指定验收文本后 reload 及新 tab 均恢复相同正文和已批准状态。原 `E-S05-I01-BASELINE` 的“无草稿”症状和 `E-S05-S03-RELOAD-BASELINE` 的“刷新丢状态”症状，在该快照的正常存储场景关闭；这不等于整个 S05-I01、C2/C5 或幂等/存储故障通过。
 
 新 tab 的 warning/error 为空；旧 tab 的 HMR 错误保留在日志中，未作为干净会话。点击“协同”进入 `/workspace` 后仍显示另一份固定示例正文与17:21保存时间，没有延续刚修改的产物：`FLOW-01` 共享草稿连续性仍为 FAIL。未执行存储故障注入或并发批准；截图未导出PNG。该日志保留09:23:34 UTC的 S05Preview/localDraft/WorkspaceScreen 三个源码 SHA256，后续变更需复核，不能沿用局部通过证明新版本。
 
@@ -356,6 +356,6 @@
 
 主监督报告当前 S05 `approvePlan` 先设置 approved，随后 effect 调用 `writeStored` 且忽略失败；`localDraft.ts` 先更新 memoryStore 再尝试 localStorage。由此推断存储失败可能仍显示批准/草稿成功，并在刷新后丢失。本条属于静态集成风险，尚非故障注入或浏览器复现证据，关联 `GLOBAL-S02`、`S05-I01`、`FLOW-05`、`FLOW-10`。功能及领域执行者已收到同一修复要求：失败不得发布成功状态或消费批准；保留编辑并说明原因；重试回读同一 operation；最终 S05/S17 通过统一事务命令入口，不能以各自 storage key 作为两个业务真相。关闭需要对应故障注入 RED/GREEN 与刷新结果。
 
-本矩阵没有PASS行。implementation-agent接手先核对用户指定模型及最新代码/图像，再按实施合同G0–G7分组推进；每个功能行落实到独立用例与证据，不得因为原测试跳过或图像为静态附件而免除。最新源码修复已有GAP后，先标“已实现未验证”，只有实际对应表面验证后才能标VERIFIED。发现新控件/新状态必须追加，不把它们排除出总清单。
+本矩阵没有PASS行。实现代理接手先核对用户指定模型及最新代码/图像，再按实施合同G0–G7分组推进；每个功能行落实到独立用例与证据，不得因为原测试跳过或图像为静态附件而免除。最新源码修复已有GAP后，先标“已实现未验证”，只有实际对应表面验证后才能标VERIFIED。发现新控件/新状态必须追加，不把它们排除出总清单。
 
-C1需要全部18屏最终版本真实浏览器对照；C2需要全部本地功能与跨屏真实结果以及adapter诚实边界；C3要求本矩阵本地行有实现/用例/证据，外部行有明确授权/未验证状态；C4需要implementation-agent实际构建和console；C5需要上述空错非法与不安排回归。implementation-agent执行验证后，由原生/主监督独立只读验收。外部条件缺失单列BLOCKED/UNKNOWN，保留需求和授权边界，不无限阻断本地交付；完整本地证据可支持“上线级本地交付完成”，不能包装成真实账户实测完成或已公开上线。历史gate的REJECT只有对应本地缺口全部修复并经新证据复核才能关闭。
+C1需要全部18屏最终版本真实浏览器对照；C2需要全部本地功能与跨屏真实结果以及adapter诚实边界；C3要求本矩阵本地行有实现/用例/证据，外部行有明确授权/未验证状态；C4需要实现代理实际构建和console；C5需要上述空错非法与不安排回归。实现代理执行验证后，由原生/主监督独立只读验收。外部条件缺失单列BLOCKED/UNKNOWN，保留需求和授权边界，不无限阻断本地交付；完整本地证据可支持“上线级本地交付完成”，不能包装成真实账户实测完成或已公开上线。历史gate的REJECT只有对应本地缺口全部修复并经新证据复核才能关闭。
