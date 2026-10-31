@@ -36,6 +36,40 @@ const narrowIdentifierPaths = [
   "docs/DEPLOYMENT.md",
 ];
 
+function loadExternalPatterns() {
+  const patternPath = process.env.PRIVACY_MODEL_PATTERNS_PATH;
+  if (!patternPath) {
+    return [];
+  }
+
+  let parsed;
+  try {
+    parsed = JSON.parse(readFileSync(patternPath, "utf8"));
+  } catch {
+    throw new Error("PRIVACY_MODEL_PATTERNS_PATH is set but is not readable JSON");
+  }
+
+  const source = Array.isArray(parsed)
+    ? parsed
+    : parsed && Array.isArray(parsed.patterns)
+      ? parsed.patterns
+      : null;
+  if (!source) {
+    throw new Error("PRIVACY_MODEL_PATTERNS_PATH must contain a pattern array");
+  }
+
+  return source.map((item) => {
+    const raw = typeof item === "string" ? item : item && typeof item.pattern === "string" ? item.pattern : null;
+    if (!raw) {
+      throw new Error("PRIVACY_MODEL_PATTERNS_PATH contains an invalid pattern");
+    }
+    const category = typeof item === "object" && item && typeof item.category === "string" && item.category.trim()
+      ? item.category.trim()
+      : "deployment-model";
+    return { category, pattern: new RegExp(raw, "i") };
+  });
+}
+
 function loadExternalMarkers() {
   const markerPath = process.env.PRIVACY_MARKERS_PATH;
   if (!markerPath) {
@@ -86,7 +120,10 @@ function trackedContent(path, mode, oid) {
   return readFileSync(path, "utf8");
 }
 
+// Optional private model-name patterns (PRIVACY_MODEL_PATTERNS_PATH) keep real
+// deployment model names out of the repo while still gating regressions.
 const externalMarkers = loadExternalMarkers();
+const externalPatterns = loadExternalPatterns();
 
 const files = execFileSync("git", ["ls-files", "-s", "-z"], { encoding: "buffer" })
   .toString()
@@ -121,6 +158,15 @@ for (const trackedEntry of files) {
     lines.forEach((line, index) => {
       if (line.includes(marker.value)) {
         console.error(path + ":" + (index + 1) + ": " + marker.category);
+        findings += 1;
+      }
+    });
+  }
+  for (const { pattern, category } of externalPatterns) {
+    lines.forEach((line, index) => {
+      pattern.lastIndex = 0;
+      if (pattern.test(line)) {
+        console.error(path + ":" + (index + 1) + ": " + category);
         findings += 1;
       }
     });
