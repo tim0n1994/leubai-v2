@@ -29,3 +29,6 @@ test-results/
 *.njsproj
 *.sln
 *.sw?
+
+# Python bytecode artifacts
+__pycache__/
