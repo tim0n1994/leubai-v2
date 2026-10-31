@@ -1,45 +1,22 @@
-# LeuBai V2
+# 探戈 Done&Go
 
-[English](README.en.md)
-
-[![CI](https://github.com/tim0n1994/leubai-v2/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/tim0n1994/leubai-v2/actions/workflows/ci.yml) [![Preview release](https://img.shields.io/github/v/release/tim0n1994/leubai-v2?include_prereleases&label=preview)](https://github.com/tim0n1994/leubai-v2/releases) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [安全策略](SECURITY.md)
+事情搞定，时间归你。（原名 探戈 留白；「留白」现在是应用里给自己留时间的那部分功能。）
 
 > 把时间还给人。
 
-### A local-first Personal Agency Layer for intent, responsibility, authorization, action, and protected time.
+> **2026-10 重新设计**：产品主线改为“被归还的人生时间，应该流向哪里？”。设计说明见 [docs/REDESIGN-2026-10.md](docs/REDESIGN-2026-10.md)；可直接打开使用的网页版本在 [`web/index.html`](web/index.html)（单文件、无需构建，本地双击即可打开）。
 
-LeuBai 让个人保留对时间和行动的判断权。它把意图、责任、授权、执行与留白放在同一条可以理解、可以修正、可以核验的时间线上。
+工程版本为 `0.0.0`（见 `package.json`）；当前可复现的公开预览入口是 [`v0.0.0-preview.4`](https://github.com/tim0n1994/leubai-v2/releases/tag/v0.0.0-preview.4)。文中的 V2 / V3 是阶段名称，不是发布版本号。LeuBai 仍是公开预览项目，不是正式生产产品。
 
-它关心的不是“还能塞进多少事情”，而是：
+探戈 Done&Go不是一张更聪明的待办清单，也不是把日历、提醒和聊天机器人拼在一起的生产力工具。它是一层 **Personal Agency Layer**：让一个人的意图、责任、授权、行动与留白，在同一条可以理解、可以修正、可以核验的时间线上共存。
 
-- 请求是否真的变成了我的责任？
-- 建议是否真的获得了我的授权？
-- 系统写入了什么，外部世界又实际发生了什么？
-- 一段没有被安排的时间，能否安静地属于我？
+时间不只是等待被填满的容器。它也是人保有判断、拒绝、暂停和重新选择能力的地方。探戈 关心的不是“还能塞进多少事情”，而是：哪些行动值得进入生活，哪些责任确实由我承担，以及一段没有被安排的时间，能否安静地属于我。
 
-LeuBai 的核心判断很简单：请求不等于承诺，建议不等于同意，“已发出”不等于“已收到”。系统需要把这些状态分开记录，也需要允许人拒绝、修正、暂停、撤回和退出。
-
-工程版本为 `0.0.0`；当前可复现的公开预览入口是 [`v0.0.0-preview.4`](https://github.com/tim0n1994/leubai-v2/releases/tag/v0.0.0-preview.4)。文中的 V2 / V3 是阶段名称，不是发布版本号。LeuBai 仍是公开预览项目，不是正式生产产品；设计稿、真实部署、视觉验收和设备验收分别计证，源码、CI 或静态设计稿不能互相替代。
-
-## Start locally
-
-需要 Node.js 22.22.2 或兼容版本。
-
-```sh
-npm ci
-npm run build
-npm start
-```
-
-然后打开 `http://127.0.0.1:5200`。该入口同时提供构建页面与本地 API。
-
-开发时可以分别运行 `npm run server` 和 `npm run dev`。端口可通过 `LEUBAI_PORT` 调整，开发代理可通过 `LEUBAI_API_URL` 指定。
-
-## LeuBai 试图回答的问题
+## 探戈 试图回答的问题
 
 当一句请求抵达，系统不应立即把它变成你的任务；当一个建议出现，系统不应把它误写成你的授权；当一次操作完成，系统也不应把“已经发出”伪装成“对方已经收到”。
 
-因此，LeuBai 把行动拆成一条清晰的链路：
+因此，探戈 把行动拆成一条清晰的链路：
 
 | 阶段 | 它回答的问题 | 系统应保持的诚实 |
 | --- | --- | --- |
@@ -111,7 +88,7 @@ V2 的桌面与移动体验围绕 18 个入口组织（桌面 14 屏、移动 4 
 
 ## 技术骨架
 
-LeuBai V2 当前是一个可在本机运行的 React + TypeScript 工程，技术结构服务于上面的边界，而不是用自动化掩盖边界。
+探戈 Done&Go 的 V2 工程当前是一个可在本机运行的 React + TypeScript 工程，技术结构服务于上面的边界，而不是用自动化掩盖边界。
 
 - React 19、TypeScript 6、Vite 8。
 - 以领域状态、命令和回读结果组织跨页面行为，保留批准、执行、冲突和未知状态。
@@ -125,7 +102,7 @@ LeuBai V2 当前是一个可在本机运行的 React + TypeScript 工程，技�
 
 ## 设计语言
 
-LeuBai 的视觉不把 AI 描绘成一个无所不知的能量中心。它更接近白瓷器物：有结构，有重量，也有让呼吸发生的空处。
+探戈 的视觉不把 AI 描绘成一个无所不知的能量中心。它更接近白瓷器物：有结构，有重量，也有让呼吸发生的空处。
 
 浅色背景、细描边、冷银结构与少量状态色共同建立层次。信息蓝表示估计与进行中，确认绿表示已同步、已授权或已保住，温暖棕表示未知、缺口与待确认事项。颜色始终与文字并用，不让颜色或图标独自承担意义。
 
@@ -177,4 +154,4 @@ npm run build
 
 ## 一句话
 
-LeuBai 不替你安排人生。它只把意图、责任、授权、行动与留白放回同一条时间线上，让技术更聪明地工作，也让人更完整地拥有自己的时间。
+探戈 不替你安排人生。它只把意图、责任、授权、行动与留白放回同一条时间线上，让技术更聪明地工作，也让人更完整地拥有自己的时间。
