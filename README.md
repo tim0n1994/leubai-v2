@@ -6,7 +6,7 @@
 
 > **2026-10 重新设计**：产品主线改为“被归还的人生时间，应该流向哪里？”。设计说明见 [docs/REDESIGN-2026-10.md](docs/REDESIGN-2026-10.md)；可直接打开使用的网页版本在 [`web/index.html`](web/index.html)（单文件、无需构建，本地双击即可打开）。
 
-工程版本为 `0.0.0`（见 `package.json`）；文中的 V2 / V3 是阶段名称，不是发布版本号。
+工程版本为 `0.0.0`（见 `package.json`）；当前可复现的公开预览入口是 [`v0.0.0-preview.4`](https://github.com/tim0n1994/leubai-v2/releases/tag/v0.0.0-preview.4)。文中的 V2 / V3 是阶段名称，不是发布版本号。LeuBai 仍是公开预览项目，不是正式生产产品。
 
 探戈 Done&Go不是一张更聪明的待办清单，也不是把日历、提醒和聊天机器人拼在一起的生产力工具。它是一层 **Personal Agency Layer**：让一个人的意图、责任、授权、行动与留白，在同一条可以理解、可以修正、可以核验的时间线上共存。
 

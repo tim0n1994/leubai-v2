@@ -9,8 +9,8 @@ The config file stays on the host (never in the repo):
       "upstream": "http://127.0.0.1:3458",
       "key": "<api key>",
       "endpoints": [
-        {"path": "/v1/messages", "model": "glm-5.3-flash"},
-        {"path": "/v1/messages-2", "model": "gpt-6-luna"}
+        {"path": "/v1/messages", "model": "example-model-flash"},
+        {"path": "/v1/messages-2", "model": "example-model"}
       ]
     }
 

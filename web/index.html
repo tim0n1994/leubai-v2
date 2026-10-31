@@ -1266,7 +1266,7 @@ html:not([lang|=zh]) .fw-n b { margin-inline: .3em; }
       eps.map(function (e) { return '<option value="' + esc(e.path) + '"' + (e.path === L.path ? ' selected' : '') + '>' + esc(e.model || e.path) + '</option>'; }).join('') + '</select></div>' +
       '<div class="col" data-ai="custom" style="gap:14px"' + (L.mode === 'custom' ? '' : ' hidden') + '>' +
       '<div class="field"><label for="s-ai-url">接口地址</label><input id="s-ai-url" inputmode="url" autocomplete="off" placeholder="http://127.0.0.1:3458/v1/messages" value="' + esc(L.url) + '"></div>' +
-      '<div class="field"><label for="s-ai-model">模型名</label><input id="s-ai-model" autocomplete="off" placeholder="glm-5.3-flash" value="' + esc(L.model) + '"></div>' +
+      '<div class="field"><label for="s-ai-model">模型名</label><input id="s-ai-model" autocomplete="off" placeholder="example-model-flash" value="' + esc(L.model) + '"></div>' +
       '<div class="field"><label for="s-ai-key">密钥</label><input id="s-ai-key" type="password" autocomplete="off" value="' + esc(L.key) + '"></div></div>' +
       '<button class="btn sm" type="button" data-act="ai-test" style="justify-self:start">测试 AI</button>';
   }
