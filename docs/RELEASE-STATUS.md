@@ -7,7 +7,7 @@
 ### RC12 注册链路实通与月视图补齐
 
 - 注册验证码链路已在 loopback `127.0.0.1:5201` 实测打通：`POST /api/auth/send-code`（console 通道）返回 `devCode`，随即 `POST /api/auth/register` 用该验证码创建用户成功，返回完整用户对象（`emailVerified:true`）。前端错误映射确认：服务器 `EMAIL_UNAVAILABLE` 的友好文案（"邮箱验证服务尚未配置，请联系管理员。"）经 `auth-client.ts` 直接展示，不暴露原始错误码。公网 `:5220`（`EMAIL_TRANSPORT=disabled`）按设计返回 `EMAIL_UNAVAILABLE`；真实邮件收发（Resend/SMTP 凭据）仍未配置，属用户侧待办。
-- 注册公网通道已配置 Resend 并实测进入真实发送：用户提供的发送专用 Resend key 写入 gitignored `.leubai-local/env`（`LEUBAI_SENDER_*` 前缀隔离，`:5201` 保持 console）。`:5220` 以 `EMAIL_TRANSPORT=resend`、`LEUBAI_PUBLIC_ORIGIN`、`LEUBAI_TRUST_CLOUDFLARE=1` 重启（tty 会话常驻）。内置浏览器实测公网注册 UI：退出旧会话 → 打开注册 → 填入 `test-rc12@udify.fun` → 发送验证码 → UI 进入"验证码已发送至 test-rc12@udify.fun"步骤（服务端 Resend 拒绝会报错而非进入该步），公网不再显示 devCode，console 全程零错误。**邮箱实际收件待用户确认**（Resend key 为发送专用，无查询权限）。
+- 注册公网通道已配置 Resend 并实测进入真实发送：用户提供的发送专用 Resend key 由操作员保存在 `$HOME/.config/leubai/leubai.env`（0600，不入库），经启动进程注入（`LEUBAI_SENDER_*` 前缀隔离，`:5201` 保持 console）。`:5220` 以 `EMAIL_TRANSPORT=resend`、`LEUBAI_PUBLIC_ORIGIN`、`LEUBAI_TRUST_CLOUDFLARE=1` 重启（tty 会话常驻）。内置浏览器实测公网注册 UI：退出旧会话 → 打开注册 → 填入 `test-rc12@udify.fun` → 发送验证码 → UI 进入"验证码已发送至 test-rc12@udify.fun"步骤（服务端 Resend 拒绝会报错而非进入该步），公网不再显示 devCode，console 全程零错误。**邮箱实际收件待用户确认**（Resend key 为发送专用，无查询权限）。
 - 时间账本月视图已补齐：`timeSurfaces.ts` 新增 `monthGridDates`（周一开头、自动 5/6 行补齐邻月）与 `selectMonthSurface`（复用与周视图相同的逐日聚合）；`S02Ledger.tsx` 增加"本月"分段视图（7 列网格、邻月淡化、无记录日期显式"无记录"未知态、当日/定位日高亮）。`npm run test:unit` 592/592（新增 2 项月视图测试）、lint 退出 0、build 退出 0。
 - 内置浏览器实测（iab，`http://127.0.0.1:5201/ledger`）：点击"本月"后网格渲染 35 格（2026 年 9 月 5 行）、邻月 5 天淡化、9/12 聚合"3 项 · 1 段留白 · 越界 10 分"与 fixture 一致、其余日期显式"无记录"；全程 console 错误为空。截图见 `.omo/evidence/rc12-month-view-20260913.md`。
 - 边界：月视图数据源仍为本地 fixture/已保存记录，不含未接入来源；`test-rc12@udify.fun` 的完整注册（输入邮件中的验证码）与真实收件确认待用户侧完成后闭环。服务器常驻方式为前台 tty 会话，launchd 持久化仍未安装。
@@ -15,7 +15,7 @@
 ### RC11 认证与部署收尾快照（覆盖 RC10 中“S09 正在补齐”与旧测试计数）
 
 - 回归 `npm run test:unit` 590/590 通过、lint 退出 0、build 退出 0。此前 `src/appearance` 未加入测试收集目录（10 项从未执行），已修复并纳入收集；新计数覆盖该目录。
-- 认证模块按 mail2profile 契约上线：loopback 实例 `127.0.0.1:5201`（`EMAIL_TRANSPORT=console`，本机验收），公网实例 `:5220`（`LEUBAI_PUBLIC_ORIGIN=https://leubai.udify.fun`、`LEUBAI_TRUST_CLOUDFLARE=1`、`EMAIL_TRANSPORT=disabled`）。cloudflared connector（隧道 `redacted-deployment-id`）已注册 4 条边缘连接，DNS 已解析，公网 root/login 返回 200。`send-code` 返回 `EMAIL_UNAVAILABLE`：公开注册按设计关闭，真实邮件通道未配置、未验证。
+- 认证模块按 mail2profile 契约上线：loopback 实例 `127.0.0.1:5201`（`EMAIL_TRANSPORT=console`，本机验收），公网实例 `:5220`（`LEUBAI_PUBLIC_ORIGIN=https://leubai.udify.fun`、`LEUBAI_TRUST_CLOUDFLARE=1`、`EMAIL_TRANSPORT=disabled`）。cloudflared connector（隧道 `<tunnel-id>`）已注册 4 条边缘连接，DNS 已解析，公网 root/login 返回 200。`send-code` 返回 `EMAIL_UNAVAILABLE`：公开注册按设计关闭，真实邮件通道未配置、未验证。
 - 本地账号创建于 `.leubai-local/auth.sqlite`（0600，不入库）。管理员白名单收敛为 `ADMIN_EMAILS=admin@udify.fun` 后复验：user 账号访问管理端点返回 403。
 - 外观主题跨账号泄漏已修复并实测闭环：appearance 存储键按所有者隔离（登录用户追加 `:u:<id>` 键，未登录保持历史键），认证恢复后主动刷新。内置浏览器验证：admin 水墨 → 退出 → 未登录瓷白 → 登录 → 水墨恢复，全程 console 错误为空。
 - `AUTH_REQUIRED` 此前显示“发生未知错误”，已改为“请先登录后再管理模型连接”，未登录访问设置页实测生效。
@@ -103,7 +103,7 @@
 | 批准→草稿→编辑 | Ego Lite 实点批准后留页，显式打开同 draft/op，第一节保存后刷新保持；一份批准/操作/草稿 | 冲突、读回未知、撤回、材料许可、移动端与全链回归 |
 | 持久化 | 工厂漏锁已修，根复测锁请求2次；Ego 两真实页面竞争5/5一胜一版本冲突，最终只保存赢家 | 全18屏交互的异常持久化覆盖仍待集成回归 |
 | 后台 LLM 设置 | Hook崩溃已修并实际渲染；Markdown粘贴、两阶段测试、修改失效、保存刷新已实测；真实端点测试/保存200，安全GET不回显密钥，文件0600/目录0700且git忽略 | 成功保存后提示矛盾的修复已落盘，待根浏览器复验；最终安全审查 |
-| 草稿助手 | 实际工作台选中单段→真实glm-5.3-flash推理→预览不改原文→手动应用→刷新保持；其他段未改、sentAt为空 | 过期完成、取消、存储未知的完整浏览器回归 |
+| 草稿助手 | 实际工作台选中单段→真实<configured-model>-flash推理→预览不改原文→手动应用→刷新保持；其他段未改、sentAt为空 | 过期完成、取消、存储未知的完整浏览器回归 |
 | 水墨主题 | 实际控件点击、键盘、刷新、双页同步、390px移动无横溢出、减少动态效果0s均已观察；圆环和导航色修复已目视 | 默认/水墨全18屏最终截图对照，账本窄列布局缺陷正在修复 |
 | 原其他页面 | 组件和局部交互存在 | s14/s17 共享闭环、检查点、规则/注意力/留白/来源等逐项接线与验收，详见矩阵 |
 | 发布 | 本地 Vite 可访问；最近 scoped TypeScript 检查曾退出 0 | 集成版本 build/lint、全部浏览器验收、明确部署目标及发布授权 |
