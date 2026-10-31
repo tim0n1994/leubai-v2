@@ -36,6 +36,61 @@ const narrowIdentifierPaths = [
   "docs/DEPLOYMENT.md",
 ];
 
+const syntheticFixturePath = "tests/unit/llm-parser.test.mjs";
+const syntheticModelPatterns = [
+  /(?:^|\s)(?:Model|模型)\s*[:：]\s*(?:\[[^\]]+\]\s*)?["'`]([^"'`\n]+)["'`]/gi,
+  /(?:^|\s)-\s*\[(?:Model|模型)\]\(([^)\s]+)\)/gi,
+  /\.model\s*,\s*["'`]([^"'`\n]+)["'`]/gi,
+];
+
+const syntheticLabelPattern = /(?:^|["'`\s])(?:Model|模型)\s*[:：]\s*(.+)$/;
+
+function normalizeFixtureModel(raw) {
+  let value = raw.trim().replace(/^["'`]+|["'`,]+$/g, "");
+  const markdown = /^\[([^\]]+)\]\(([^)]+)\)$/.exec(value);
+  if (markdown) {
+    value = markdown[2];
+  }
+  return value.trim().replace(/^["'`]+|["'`,]+$/g, "").trim();
+}
+
+function loadExternalPatterns() {
+  const patternPath = process.env.PRIVACY_MODEL_PATTERNS_PATH;
+  if (!patternPath) {
+    return [];
+  }
+
+  let parsed;
+  try {
+    parsed = JSON.parse(readFileSync(patternPath, "utf8"));
+  } catch {
+    throw new Error("PRIVACY_MODEL_PATTERNS_PATH is set but is not readable JSON");
+  }
+
+  const source = Array.isArray(parsed)
+    ? parsed
+    : parsed && Array.isArray(parsed.patterns)
+      ? parsed.patterns
+      : null;
+  if (!source) {
+    throw new Error("PRIVACY_MODEL_PATTERNS_PATH must contain a pattern array");
+  }
+
+  return source.map((item) => {
+    const raw = typeof item === "string" ? item : item && typeof item.pattern === "string" ? item.pattern : null;
+    if (!raw) {
+      throw new Error("PRIVACY_MODEL_PATTERNS_PATH contains an invalid pattern");
+    }
+    let pattern;
+    try {
+      pattern = new RegExp(raw, "i");
+    } catch {
+      throw new Error("PRIVACY_MODEL_PATTERNS_PATH contains a pattern that failed to compile");
+    }
+    return { category: "deployment-model", pattern };
+  });
+}
+
 function loadExternalMarkers() {
   const markerPath = process.env.PRIVACY_MARKERS_PATH;
   if (!markerPath) {
@@ -62,10 +117,7 @@ function loadExternalMarkers() {
     if (!item || typeof item.value !== "string" || item.value.length === 0) {
       throw new Error("PRIVACY_MARKERS_PATH contains an invalid marker");
     }
-    const category = typeof item.category === "string" && item.category.trim()
-      ? item.category.trim()
-      : "external-marker";
-    return { category, value: item.value };
+    return { category: "external-marker", value: item.value };
   });
 }
 
@@ -86,7 +138,10 @@ function trackedContent(path, mode, oid) {
   return readFileSync(path, "utf8");
 }
 
+// Optional private model-name patterns (PRIVACY_MODEL_PATTERNS_PATH) keep real
+// deployment model names out of the repo while still gating regressions.
 const externalMarkers = loadExternalMarkers();
+const externalPatterns = loadExternalPatterns();
 
 const files = execFileSync("git", ["ls-files", "-s", "-z"], { encoding: "buffer" })
   .toString()
@@ -100,6 +155,30 @@ for (const trackedEntry of files) {
   const [mode, oid] = metadata.trim().split(/\s+/);
   const content = trackedContent(path, mode, oid);
   const lines = content.split("\n");
+  if (path === syntheticFixturePath) {
+    for (const [lineIndex, line] of lines.entries()) {
+      const labelMatch = syntheticLabelPattern.exec(line);
+      if (labelMatch) {
+        const value = normalizeFixtureModel(labelMatch[1]);
+        if (!value.startsWith("synthetic-model-")) {
+          console.error(path + ":" + (lineIndex + 1) + ": non-synthetic-model-fixture");
+          findings += 1;
+        }
+      }
+    }
+    for (const pattern of syntheticModelPatterns) {
+      pattern.lastIndex = 0;
+      let match;
+      while ((match = pattern.exec(content))) {
+        const lineNumber = content.slice(0, match.index).split("\n").length;
+        const value = normalizeFixtureModel(match[1]);
+        if (!value.startsWith("synthetic-model-")) {
+          console.error(path + ":" + lineNumber + ": non-synthetic-model-fixture");
+          findings += 1;
+        }
+      }
+    }
+  }
   for (const [pattern, category] of rules) {
     // These tests exercise RFC1918 validation; other privacy rules still apply.
     if (category === "private-network-address" && allow.has(path)) {
@@ -121,6 +200,15 @@ for (const trackedEntry of files) {
     lines.forEach((line, index) => {
       if (line.includes(marker.value)) {
         console.error(path + ":" + (index + 1) + ": " + marker.category);
+        findings += 1;
+      }
+    });
+  }
+  for (const { pattern, category } of externalPatterns) {
+    lines.forEach((line, index) => {
+      pattern.lastIndex = 0;
+      if (pattern.test(line)) {
+        console.error(path + ":" + (index + 1) + ": " + category);
         findings += 1;
       }
     });
